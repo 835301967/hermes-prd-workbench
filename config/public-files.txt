@@ -121,6 +121,7 @@ apps/backend/src/test/java/org/hermesprd/workbench/hermes/ToolServiceTest.java
 apps/backend/src/test/java/org/hermesprd/workbench/result/HtmlPayloadTest.java
 apps/backend/src/test/java/org/hermesprd/workbench/result/ResultValidatorTest.java
 apps/backend/src/test/java/org/hermesprd/workbench/shared/ApiExceptionHandlerTest.java
+apps/backend/src/test/java/org/hermesprd/workbench/shared/CorsRequestTest.java
 apps/backend/src/test/java/org/hermesprd/workbench/shared/WebConfigTest.java
 apps/backend/src/test/java/org/hermesprd/workbench/task/DemoSkillsTest.java
 apps/backend/src/test/java/org/hermesprd/workbench/task/PocSkillsTest.java
@@ -170,6 +171,8 @@ apps/web/src/formatElapsed.ts
 apps/web/src/main.ts
 apps/web/src/markdown.test.ts
 apps/web/src/markdown.ts
+apps/web/src/mermaidConfig.ts
+apps/web/src/mermaidRenderer.test.ts
 apps/web/src/mermaidRenderer.ts
 apps/web/src/mermaidSecurity.test.ts
 apps/web/src/mermaidSecurity.ts
@@ -285,6 +288,7 @@ tests/fixtures/poc-crm-spa/js/store.js
 tests/fixtures/poc-crm-spa/js/views/customers.js
 tests/fixtures/poc-crm-spa/js/views/orders.js
 tests/fixtures/poc-crm-spa/js/views/products.js
+tests/fixtures/prd-mermaid-regression.md
 tests/fixtures/prd-pack-finance/00-overview.md
 tests/fixtures/prd-pack-finance/01-ia.md
 tests/fixtures/prd-pack-finance/02-global.md
@@ -297,9 +301,11 @@ tests/fixtures/prd-pack-finance/modules/ledger.md
 tests/fixtures/prd-pack-finance/modules/voucher.md
 tests/fixtures/prd-pack-finance/open-questions.md
 tests/fixtures/prompt-injection.md
+tests/fixtures/proxy-upstream.py
 tests/fixtures/review-clear.md
 tests/fixtures/review-conflict.md
 tests/fixtures/review-gaps.md
+tests/nginx_proxy_smoke.py
 tests/test_contracts.py
 tests/test_deployment.py
 tests/test_release.py

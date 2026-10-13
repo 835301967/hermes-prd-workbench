@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Use shared, trusted Mermaid root-level SVG-text configuration for PRD previews and Word export, preserving Chinese node labels through strict SVG sanitization; add real Mermaid flowchart/sequence regression coverage.
+
+- Preserve the browser Host port through the Compose Nginx proxy, fixing HTTP403 Invalid CORS request on same-origin login and writes through default/custom Web ports. Keep explicit cross-origin restrictions and add positive/negative transport regression coverage.
+
 ## 0.4.0-beta.1 — preview
 
 - Move applications to apps/backend and apps/web; centralize synthetic fixtures and public documentation.

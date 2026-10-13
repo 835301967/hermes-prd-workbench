@@ -24,6 +24,8 @@ jobs:
           pnpm --dir apps/web install --frozen-lockfile
       - name: Check source
         run: scripts/check.sh
+      - name: Verify real Nginx request authority and origin
+        run: python tests/nginx_proxy_smoke.py
       - name: Build source snapshot and dependency inventories
         run: |
           python scripts/package-release.py --output artifacts/hermes-prd-workbench-source.tar.gz

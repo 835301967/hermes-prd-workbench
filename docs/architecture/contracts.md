@@ -21,3 +21,7 @@ Update producer, consumer, tests and these descriptions together whenever the fo
 Estimate Schema describes canonical producer fields; runtime minimal validation also accepts documented name/type/qaDays aliases without rewriting the saved payload. Effort may use fractional precision beyond one decimal. Totals and scope remain Agent supplied; the service does not repair or reconcile them.
 
 TECH_SPEC supports physical or local logical data models, structured index intent, local/view adapter method labels, and textual or structured error-code lists. UI and Markdown export render these values as text; stored results stay immutable. No HTTP transport or server database is invented for a browser-only solution.
+
+## Browser origin transport
+
+The Compose Web entry serves the page and relative `/api/v1` requests on one HTTP origin. Nginx forwards the original Host including its port and leaves Origin unchanged. Spring therefore recognizes valid same-origin writes on default/custom Web ports; actual cross-origin or opaque-origin requests still require the explicit backend allowlist. Native development has its separate configured origins. CORS403 is not an administrator authorization grant. No response/body/schema or authentication semantics changed.

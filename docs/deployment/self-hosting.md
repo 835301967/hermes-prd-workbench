@@ -22,6 +22,23 @@ start builds and launches services, then waits for Web and /api/v1/health. docto
 
 `./workbench logs` shows local operational logs. Review/redact before sharing: Hermes can retain private conversations within its private volume; that volume is never a public artifact. If startup fails, inspect component readiness, secret-file readability, occupied Web port and provider credentials. Invalid model/configuration must fail explicitly, not show fabricated analysis.
 
+### HTTP403 / Invalid CORS request after login
+
+Use the same Web origin for the page and API: for example `http://localhost:8180` with relative `/api/v1` requests. The Compose Nginx proxy preserves the complete browser Host header, including a custom published port. Dropping the port makes Spring treat the same-origin login or write request as cross-origin and reject it; health checks without an Origin header can still pass. This transport issue can occur on WSL2 as well as other Docker hosts.
+
+For an existing checkout containing the old proxy configuration, run inside the checkout's WSL2/Linux filesystem:
+
+```bash
+git pull --ff-only
+docker compose build web
+docker compose up -d --no-deps web
+./workbench doctor
+```
+
+With a custom environment file use the same `--env-file` and project name used for the original start on both Compose commands. These commands recreate only Web and preserve database/upload/Hermes volumes. `doctor` is a readiness check, not a browser CORS test; then test login and a write action in the browser. No new database migration is needed.
+
+Native development cross-origin requests still use the explicit `PRD_CORS_ALLOWED_ORIGINS` list. Do not use `*`, strip/rewrite Origin, disable browser security or disable server CORS checks to work around a403. Requests from untrusted or opaque (`null`) origins remain rejected. A403 with application code FORBIDDEN on an administrator endpoint is a role-denial response and must not be bypassed.
+
 Loopback binding is intentional. Serving a trusted network requires an explicit PRD_WEB_BIND change; Internet exposure additionally requires a separately reviewed TLS/auth/proxy deployment. No TLS production guarantee is implied by the local example.
 
 ## Backup, upgrade and restore

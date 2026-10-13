@@ -16,10 +16,11 @@ Use a fresh project-owned MySQL schema, pinned Hermes source with the reviewed A
 | OSS-T10 | Public refs, images, Office and external artifacts | No customer/private material; publication rights documented |
 | OSS-T11 | Malicious HTML in iframe and new tab | Cannot access workbench storage/DOM/API; no same-origin or top navigation |
 | OSS-T12 | Static diagnostics, malformed/missing validator/timeout | No eval/VM execution, no credential inheritance, behaviorProof false |
-| OSS-T13 | Mermaid configuration/events/resources/size and Word export | Strict and sanitized; unsafe diagrams retain source; valid diagrams display |
+| OSS-T13 | Mermaid configuration/events/resources/size and Word export | Strict and sanitized; unsafe diagrams retain source; native SVG labels remain visible in flowcharts and sequence actors/messages/notes/alt/loop; preview/export share trusted configuration |
 | OSS-T14 | Telemetry off/on, unauthenticated/invalid metadata and retention | Off does not send/persist, auth/limits/allowlist, no raw error text |
 | OSS-T15 | License, dependency provenance and SBOM | Third-party original terms retained; ownership gate complete before publication |
 | OSS-T16 | Untrusted PR and release workflow/source archive | No PR secrets/publication authority; allowlisted files and hashes |
+| OSS-T18 | Compose browser Origin through default/custom Web ports | Same-origin login and writes pass with Host port preserved; hostile/null origins and unauthorized role access remain denied; native development preflight retains explicit allowlist |
 | OSS-T17 | Chinese synthetic materials, seven real Agent modes | Tools submit parseable persistent results; refresh/manual retry/export work |
 
 Regression also covers PRD-01/02 and THIN-REQ-01/02/03/05/07 from product.md: create requirement; Chinese MD/DOCX/XLSX upload and empty-material validation; current draft save/unsaved/concurrency; review decision inheritance; real runs; refresh/history/export; explicit failure/manual rerun; user cannot access admin.
@@ -27,3 +28,7 @@ Regression also covers PRD-01/02 and THIN-REQ-01/02/03/05/07 from product.md: cr
 At 390, 1366, 1440 and 1920 widths check text/buttons/dialogs/menus/scroll, empty/loading/error states and operation accessibility. Click through success, validation, failure and refresh in a real browser. Mock/API-only tests do not satisfy module completion. Existing internal screenshots and source documents are not reused as public evidence.
 
 Automation commands: scripts/check.sh; Maven/JUnit, frontend typecheck/Vitest/build, Python plugin/deployment tests, candidate/text scans and diff checks. The report must separately list unexecuted real-model/platform/restore/history/license gates.
+
+OSS-T18 regression: `CorsRequestTest` exercises Spring MVC same-origin/default/custom-port behavior and negative preflights. CI additionally runs `python3 tests/nginx_proxy_smoke.py` with the shipped configuration, pinned real Nginx, a synthetic echo upstream and isolated ephemeral containers/network; it asserts complete Host/Origin/method/query forwarding without model credentials or databases. Real Nginx acceptance must send Origin on login, authenticated task creation and a PUT draft/feedback action, using localhost and127.0.0.1; include a custom external port, foreign/null origins and refresh. A doctor or API request without Origin alone cannot close this gate. WSL2 platform claims still require an actual WSL2 execution record.
+
+OSS-T13 regression uses the real installed Mermaid library through Markdown/render/SVG sanitization. JSDOM stubs only SVG geometry; those tests prove label preservation, not browser layout or canvas PNG conversion. Use tests/fixtures/prd-mermaid-regression.md for actual browser and Word-export visual acceptance. Existing PRD results and drafts are not rewritten to repair diagrams.
