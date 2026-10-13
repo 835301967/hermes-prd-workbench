@@ -1,4 +1,5 @@
 import mermaid from "mermaid";
+import { mermaidRenderConfig } from "./mermaidConfig";
 import { safeDiagramCode, sanitizeDiagramSvg } from "./mermaidSecurity";
 
 let initialized = false;
@@ -7,23 +8,7 @@ export function initMermaid(): void {
   if (initialized || typeof window === "undefined") {
     return;
   }
-  mermaid.initialize({
-    startOnLoad: false,
-    theme: "default",
-    securityLevel: "strict",
-    maxTextSize: 20000,
-    maxEdges: 500,
-    flowchart: { htmlLabels: false },
-    fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-    themeVariables: {
-      primaryColor: "#EBF5FF",
-      primaryTextColor: "#1E3A8A",
-      primaryBorderColor: "#3B82F6",
-      lineColor: "#64748B",
-      secondaryColor: "#F1F5F9",
-      tertiaryColor: "#FFFFFF",
-    },
-  });
+  mermaid.initialize(mermaidRenderConfig());
   initialized = true;
 }
 

@@ -1,6 +1,7 @@
 import type { Paragraph as DocxParagraph, Table as DocxTable } from "docx";
 import { unwrapMarkdown } from "./markdown";
 import { safeDiagramCode, sanitizeDiagramSvg } from "./mermaidSecurity";
+import { mermaidRenderConfig } from "./mermaidConfig";
 
 export function safeFilename(name: string, ext: string) {
   const base = (name || "PRD")
@@ -229,23 +230,7 @@ async function getMermaidInstance() {
   if (!mermaidInitPromise) {
     mermaidInitPromise = (async () => {
       const { default: mermaid } = await import("mermaid");
-      mermaid.initialize({
-        startOnLoad: false,
-        theme: "default",
-        securityLevel: "strict",
-        maxTextSize: 20000,
-        maxEdges: 500,
-        flowchart: { htmlLabels: false },
-        fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-        themeVariables: {
-          primaryColor: "#EBF5FF",
-          primaryTextColor: "#1E3A8A",
-          primaryBorderColor: "#3B82F6",
-          lineColor: "#64748B",
-          secondaryColor: "#F1F5F9",
-          tertiaryColor: "#FFFFFF",
-        },
-      });
+      mermaid.initialize(mermaidRenderConfig());
       return mermaid;
     })();
   }
