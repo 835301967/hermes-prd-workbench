@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hermes-prd-workbench:schema:demo-result-spike.json",
+  "title": "Hermes PRD Demo Result - Spike",
+  "type": "object",
+  "required": ["mode", "title", "summary", "html"],
+  "properties": {
+    "mode": { "const": "DEMO" },
+    "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "summary": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "html": { "type": "string", "minLength": 1 },
+    "scriptMarkdown": { "type": "string", "maxLength": 30000 },
+    "skill": { "type": "string", "maxLength": 64, "default": "generic-admin-html" },
+    "package_files": {
+      "type": "object",
+      "description": "Optional UTF-8 text file map. The complete DEMO payload, including html, metadata and package_files, is limited to 20 MiB (20,971,520 bytes). The service rejects absolute paths, traversal, environment/credential files, non-text values and obvious credential assignments.",
+      "propertyNames": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 512,
+        "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!.*//)(?!.*\\/$)(?!.*(^|/)\\.\\.?(/|$)).+$"
+      },
+      "additionalProperties": { "type": "string" }
+    },
+    "references": {
+      "type": "array",
+      "maxItems": 200,
+      "items": { "type": "object", "additionalProperties": true },
+      "default": []
+    }
+  },
+  "not": { "required": ["packageFiles"] },
+  "additionalProperties": true
+}

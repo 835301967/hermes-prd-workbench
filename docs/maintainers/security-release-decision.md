@@ -1,0 +1,44 @@
+# Preview release security decision
+
+Date: 2026-10-13. Status: implementation and regression in progress; not a release approval.
+
+The author confirmed sole personal development and publication rights, Apache-2.0, the neutral name Hermes PRD Workbench, a new repository from an audited clean snapshot while retaining the internal repository privately, necessary security upgrades with recorded regression/review, and a fresh-install preview limited to verified platforms. The author authorized publication after checks; unresolved concrete risks require disposition before publication.
+
+## Application dependency decisions
+
+- Spring Boot 3.2.4 → 3.5.16, keeping Java21/MVC and the modular monolith. Boot manages Framework6.2.19/Security6.5.11/Jackson2.21.7 (explicit BOM override)/Flyway11.7.2. Override Tomcat10.1.61, Logback1.5.38 and Log4j2.26.1 to patched compatible lines. POI5.2.5 → 5.5.1. No Cloud/Nacos additions.
+- Vue3.4.27 → 3.5.43; Vite5.2.12 → 6.4.4; Vitest3.2.6 → 4.1.11; plugin-vue6.0.10; vue-tsc3.3.13; TypeScript5.4.5 → 5.9.3. Keep Node22.23.1/pnpm11.9.0. Update optional Sass peer to1.105.1, removing vulnerable chokidar3/braces3; brace-expansion2.1.7 override. No Sass runtime compilation of generated artifacts.
+- BCrypt passwords are never truncated: registration/bootstrap/admin creation require at least8 Unicode characters and <=72 UTF-8 bytes; overlong login returns authentication failure. Cover ASCII72+suffix and Chinese24/25 character boundaries, error statuses and no database write. [Spring CVE-2025-22228](https://spring.io/security/cve-2025-22228/).
+- Upload regression covers changed Tomcat/POI/Jackson/Flyway dependencies. [Tomcat security](https://tomcat.apache.org/security-10.html), [Vite advisory](https://github.com/vitejs/vite/security/advisories/GHSA-fx2h-pf6j-xcff), [Vue advisory](https://github.com/vuejs/core/security/advisories/GHSA-g2v6-rqmx-r4w6), [Vitest advisory](https://github.com/vitest-dev/vitest/security/advisories/GHSA-82fw-gwwq-j7x9).
+
+## Runtime and distribution decisions
+
+New MySQL default will use a fixed8.4 LTS image on a new schema/volume. Never upgrade or overwrite the prior acceptance database in place. Preserve backups, verify fresh V001–V013 migrations, all constraints, upload persistence, manual failure/rerun and restoration.
+
+Hermes source/runtime/API dependency selection and base image updates require rebuilt-image scans and real seven-mode regression. Removing the messaging extra alone breaks aiohttp API startup; use precisely locked API dependencies and keep disabled tool boundaries. No host DPM runtime modifications.
+
+The first publication distributes original source and build instructions, not compiled JARs or prebuilt container images. Apache-2.0 applies to original project source; Connector/J, MySQL, Hermes and image/system dependencies retain their own terms. Binary redistribution needs a separate exact-version notices/source-obligations review.
+
+## Verification
+
+Initial npm audit: 0 critical,6 high,16 moderate,2 low. After the above frontend lock updates, the official npm registry audit reported0 findings in all severities. These counts cover that dependency audit only; runtime images and source calls are separate gates. Final regression, image evidence, independent review and residual decisions will be recorded here before publication.
+
+Hermes0.16.0 source is retained. Latest upstream0.21.7 now requires Python3.14 and a different package/runtime manager, which would widen this patch beyond the verified architecture. Instead resolve the fixed source core dependencies plus aiohttp3.14.5 with reviewed overrides (anyio4.15.1, PyJWT2.15.1, cryptography50.0.2, Pillow12.3.0, urllib32.8.0, Starlette1.7.0), generate distribution hashes, and install without messaging extras. The upstream dependency metadata intentionally differs for overridden exact pins; report this explicitly and verify actual imports/call paths rather than claiming upstream uv.lock remains unchanged. uv0.13.0 and setuptools82.0.1 are isolated build tools, excluded from the runtime environment.
+
+Nginx and Java runtime Alpine packages are refreshed during build to obtain zlib1.3.2-r1 security fixes. MySQL8.4.11, Java21 Alpine and slim unprivileged Nginx are selected by immutable multiarchitecture image digest. Runtime image scans still required; changing base names alone is not approval. Maintainer public conduct/security fallback contact was explicitly confirmed as835301967@qq.com.
+
+MySQL image reduction: retain the fixed official server and entrypoint, remove the unused mysql-shell package with the distribution package manager (including its bundled Python environment), remove gosu and run as the existing mysql user. The upstream non-root branch skips gosu and new named volumes inherit the image’s mysql ownership. Never chown an existing unrelated/legacy volume. Verify new-volume initialization, restart, secret readability, mysqldump and isolated restoration before publication. The official image/server’s original license still applies. Cryptography is an optional override and is absent from the Hermes core/API lock; do not count it as an installed upgrade.
+
+Real HTTP regression found the old LoginRequest character limit could preempt the byte guard with HTTP400. Login now accepts bounded requests of at most4096 characters and rejects credentials beyond72 UTF-8 bytes with HTTP401; oversized requests remain HTTP400. New MockMvc tests cover ASCII suffix, Chinese byte overflow and excessive request length. Commons Lang3 is explicitly patched to3.21.0 after rebuilt-JAR audit found an older transitive version. Backend builds use a Maven cache mount and a single package resolution, eliminating unnecessary go-offline plugin downloads.
+
+The Alpine stable repository still offers Expat2.8.5. Server Excel exporters use fixed widths and OOXML font metadata, without AWT/fontconfig rendering. Remove unused fontconfig/fonts/Expat and image-build gnupg/coreutils from the Java runtime, retaining the JRE and OpenSSL. Real estimate/test-case XLSX exports and independent review must verify this reduction before the finding can close. Malformed multipart and missing file parts return a generic HTTP400 without parser content; the dedicated oversized upload handler retains HTTP413.
+
+Independent review reproduced malformed DOCX bytes surfacing an unchecked POI format exception as HTTP500 after the POI upgrade. Map the explicit POI invalid/empty/OOXML parse exception families plus IOException to generic HTTP400 for both DOCX/XLSX, while unexpected runtime errors remain server errors. Cover garbage/empty bytes and corrupted internal XML, normal Chinese Office imports, and real multipart uploads without logging parser content.
+
+Formal seven-mode validation found a successful REVIEW containing plain strings in optional lists, inconsistent with the existing schema. Keep that original immutable. Enforce only the declared minimum object/nonempty-string-title structure for all three review lists, clarify the producer instructions/tool description, and rerun REVIEW manually. No conclusions, priorities or document organization are generated or repaired by the control plane.
+
+Real container replacement exposed a reverse-proxy DNS issue: Nginx retained the replaced backend container IP and returned502 even though the direct backend was healthy. Use Docker’s internal DNS resolver with a short cache for the backend service hostname. This is standard proxy name resolution, with no business retry, state recovery or distributed infrastructure. Verify doctor and API routing after controlled backend replacement.
+
+Independent browser-boundary review found HTML maxlength72 could silently truncate an ASCII password before the API byte guard. Login, registration and administrator forms now preserve input up to the transport limit4096 instead of truncating at the BCrypt boundary. Registration/admin validation explicitly rejects invalid byte lengths; login passes the original value to the HTTP401 guard. Real paste/browser confirmation remains a required release gate.
+
+Final local regression on the complete code passed 227 backend, 89 frontend, 60 plugin and 15 deployment/contract/inventory tests, frontend type/build checks and source/document/diff checks. Independent review closed the password and Office P2 findings. Real seven-mode schemas, Chinese imports, upload error boundaries, XLSX exports, backend IP replacement, MySQL backup and isolated restoration passed. The restore matched nine table row counts, 13 migration checksums and 35 uploaded-file hashes. The frontend image scan reports zero findings; the final backend retains two Spring view-feature findings whose triggers are absent. Browser confirmation, cloud CI and explicit TLS/zlib residual acceptance remain required before publication.

@@ -1,0 +1,2 @@
+# Upstream build-system compatibility; isolated build stage only.
+setuptools==82.0.1

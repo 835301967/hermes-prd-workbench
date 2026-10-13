@@ -1,0 +1,64 @@
+server:
+  port: ${PRD_SERVER_PORT:18100}
+  address: ${PRD_SERVER_ADDRESS:127.0.0.1}
+
+spring:
+  config:
+    import: optional:configtree:/run/secrets/
+  application:
+    name: hermes-prd-workbench
+  datasource:
+    url: ${PRD_DB_URL:jdbc:mysql://127.0.0.1:3306/prd_workbench?useUnicode=true&characterEncoding=utf8&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true}
+    username: ${PRD_DB_USERNAME:prd_workbench}
+    password: ${PRD_DB_PASSWORD:}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 3000
+  flyway:
+    enabled: true
+    baseline-on-migrate: false
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 30MB
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: input
+
+workbench:
+  upload-dir: ${PRD_UPLOAD_DIR:${user.home}/.local/share/hermes-prd-workbench/uploads}
+  max-source-bytes: 10485760
+  max-result-bytes: 20971520
+  source-page-chars: 12000
+  run-timeout: 600s
+  demo-run-timeout: 1200s
+  poc-run-timeout: 2400s
+  generate-run-timeout: 2400s
+  test-case-run-timeout: 2400s
+  tech-spec-run-timeout: 2400s
+  hermes:
+    base-url: ${PRD_HERMES_BASE_URL:http://127.0.0.1:8643}
+    api-key-file: ${PRD_HERMES_API_KEY_FILE:${user.home}/.local/share/hermes-prd-workbench/secrets/hermes-api-key}
+    profile: prd-workbench
+    expected-version: 0.16.0
+    connect-timeout: 3s
+  plugin-key-file: ${PRD_PLUGIN_KEY_FILE:${user.home}/.local/share/hermes-prd-workbench/secrets/plugin-key}
+
+logging:
+  level:
+    root: INFO
+    org.hermesprd.workbench: INFO
+
+# Browser usage collection is opt-in. Run failure monitoring uses agent_run.
+telemetry:
+  enabled: ${PRD_TELEMETRY_ENABLED:false}
+  retention-days: ${PRD_TELEMETRY_RETENTION_DAYS:30}

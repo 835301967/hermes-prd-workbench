@@ -1,0 +1,16 @@
+name: Bug report
+description: Report a reproducible problem without private materials or credentials.
+body:
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps, expected behavior and actual behavior
+      description: Use synthetic materials. Never paste keys, prompts, private documents or raw model logs.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Release, platform and component versions
+    validations:
+      required: true

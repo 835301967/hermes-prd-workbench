@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hermes-prd-workbench:schema:generation-result-spike.json",
+  "title": "Hermes PRD Generation Result - Spike",
+  "type": "object",
+  "required": ["mode", "title", "summary", "markdown"],
+  "properties": {
+    "mode": { "const": "GENERATE" },
+    "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "summary": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "markdown": { "type": "string", "minLength": 1, "maxLength": 2000000 },
+    "workspaceFile": { "type": "string", "maxLength": 256 },
+    "files": {
+      "type": "array",
+      "items": { "type": "string", "maxLength": 512 },
+      "maxItems": 200
+    },
+    "prd_files": {
+      "type": "object",
+      "description": "Assembled GENERATE pack. Keys are relative POSIX paths (README.md, *.md, modules/*.md, data/*.json). Historical results may omit this field.",
+      "additionalProperties": { "type": "string" }
+    },
+    "openQuestions": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "oneOf": [
+          { "type": "string", "maxLength": 2000 },
+          {
+            "type": "object",
+            "properties": {
+              "question": { "type": "string", "maxLength": 2000 },
+              "reason": { "type": "string", "maxLength": 2000 }
+            },
+            "additionalProperties": true
+          }
+        ]
+      },
+      "default": []
+    },
+    "references": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "maxLength": 100 },
+          "sourceId": { "type": "string", "maxLength": 100 },
+          "sourceName": { "type": "string", "maxLength": 300 },
+          "quote": { "type": "string", "maxLength": 4000 },
+          "location": { "type": "string", "maxLength": 500 }
+        },
+        "additionalProperties": true
+      },
+      "default": []
+    }
+  },
+  "additionalProperties": true
+}

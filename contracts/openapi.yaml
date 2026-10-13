@@ -1,0 +1,1711 @@
+openapi: 3.1.0
+info:
+  title: Hermes PRD Workbench API
+  version: 0.4.0-beta.1
+  description: Minimal local single-user contract for validating an editable PRD, review decisions, Demo generation, workload estimation, test case generation, and technical solution breakdown through real Hermes.
+servers:
+  - url: http://127.0.0.1:18100
+security:
+  - SessionToken: []
+tags:
+  - name: Health
+  - name: Auth
+  - name: Tasks
+  - name: Runs
+  - name: HermesTools
+  - name: UpdateLogs
+  - name: AdminAnalytics
+paths:
+  /api/v1/telemetry/events:
+    post:
+      summary: Record an authenticated opt-in local event (disabled by default)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientEventRequest'
+      responses:
+        '200':
+          description: Received; disabled collection does not persist any event
+        '400':
+          description: Invalid or oversized event fields
+        '401':
+          description: Authentication required
+  /api/v1/health:
+    get:
+      tags: [Health]
+      operationId: getHealth
+      security: []
+      responses:
+        '200':
+          description: Service health
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /api/v1/update-logs:
+    get:
+      tags: [UpdateLogs]
+      operationId: getPublishedUpdateLogs
+      security: []
+      responses:
+        '200':
+          description: Published update logs summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateLogSummaryResponse'
+  /api/v1/admin/analytics/dashboard:
+    get:
+      tags: [AdminAnalytics]
+      operationId: getAdminDashboard
+      description: Admin only. Failure sections include only failed GENERATE, POC, TEST_CASE, TECH_SPEC, and REVIEW runs.
+      responses:
+        '200':
+          description: Dashboard, including the latest 50 monitored run failures
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDashboardResponse'
+  /api/v1/admin/analytics/errors:
+    get:
+      tags: [AdminAnalytics]
+      operationId: getMonitoredFailureStats
+      parameters:
+        - name: days
+          in: query
+          schema:
+            type: integer
+            default: 30
+            minimum: 1
+            maximum: 365
+      responses:
+        '200':
+          description: Failed runs grouped by mode and error code
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MonitoredFailureStat'
+  /api/v1/admin/analytics/recent-errors:
+    get:
+      tags: [AdminAnalytics]
+      operationId: getRecentMonitoredFailures
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Most recent failed runs, ordered by finish time
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MonitoredFailure'
+  /api/v1/admin/update-logs:
+    get:
+      tags: [UpdateLogs]
+      operationId: getAdminUpdateLogs
+      security:
+        - SessionToken: []
+      parameters:
+        - name: keyword
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of update logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UpdateLog'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [UpdateLogs]
+      operationId: createUpdateLog
+      security:
+        - SessionToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUpdateLogRequest'
+      responses:
+        '201':
+          description: Update log created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateLog'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/v1/admin/update-logs/{id}:
+    put:
+      tags: [UpdateLogs]
+      operationId: updateUpdateLog
+      security:
+        - SessionToken: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUpdateLogRequest'
+      responses:
+        '200':
+          description: Update log updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateLog'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [UpdateLogs]
+      operationId: deleteUpdateLog
+      security:
+        - SessionToken: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Update log deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v1/admin/update-logs/{id}/status:
+    post:
+      tags: [UpdateLogs]
+      operationId: toggleUpdateLogStatus
+      security:
+        - SessionToken: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStatusRequest'
+      responses:
+        '200':
+          description: Status toggled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateLog'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v1/auth/register:
+    post:
+      tags: [Auth]
+      operationId: register
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/v1/auth/login:
+    post:
+      tags: [Auth]
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v1/auth/logout:
+    post:
+      tags: [Auth]
+      operationId: logout
+      security:
+        - SessionToken: []
+      responses:
+        '204':
+          description: Session deleted
+  /api/v1/auth/me:
+    get:
+      tags: [Auth]
+      operationId: currentUser
+      security:
+        - SessionToken: []
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v1/tasks:
+    get:
+      tags: [Tasks]
+      operationId: listTasks
+      security:
+        - SessionToken: []
+      responses:
+        '200':
+          description: Tasks owned by the current user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [Tasks]
+      operationId: createTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '201':
+          description: Task created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /api/v1/tasks/{taskId}:
+    get:
+      tags: [Tasks]
+      operationId: getTask
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      responses:
+        '200':
+          description: Task and source summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [Tasks]
+      operationId: renameTask
+      security:
+        - SessionToken: []
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenameTaskRequest'
+      responses:
+        '200':
+          description: Task title updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v1/demo-skills:
+    get:
+      tags: [Runs]
+      operationId: listDemoSkills
+      security:
+        - SessionToken: []
+      responses:
+        '200':
+          description: Allowed Demo style skills
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DemoSkill'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v1/quality-options:
+    get:
+      tags: [Runs]
+      operationId: listQualityOptions
+      security:
+        - SessionToken: []
+      responses:
+        '200':
+          description: Output completeness and focus lens catalog
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QualityOptions'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v1/tasks/{taskId}/sources:
+    post:
+      tags: [Tasks]
+      operationId: uploadSource
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Source stored and parsed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          description: Only MD, TXT, DOCX, and XLSX are supported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: RUN_NOT_ACTIVE while the material set is frozen, or SOURCE_CHANGED when the same legal current draft already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/tasks/{taskId}/sources/{sourceId}:
+    delete:
+      tags: [Tasks]
+      operationId: deleteSource
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+        - $ref: '#/components/parameters/SourceId'
+      responses:
+        '204':
+          description: Source deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: RUN_NOT_ACTIVE because the task has a PENDING/RUNNING run, so its material set is frozen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/tasks/{taskId}/draft-sources/{sourceId}:
+    get:
+      tags: [Tasks]
+      operationId: getDraftSource
+      description: Read the saved current PRD. Only a generated draft source backed by a succeeded GENERATE run is addressable here.
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+        - $ref: '#/components/parameters/SourceId'
+      responses:
+        '200':
+          description: Saved current PRD and its optimistic concurrency token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DraftSourceResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Tasks]
+      operationId: updateDraftSource
+      description: Explicitly save the current PRD without changing the immutable Hermes result or the run accepted flag.
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+        - $ref: '#/components/parameters/SourceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDraftSourceRequest'
+      responses:
+        '200':
+          description: Current PRD saved; updatedAt is the new optimistic concurrency token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DraftSourceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: SOURCE_CHANGED, or RUN_NOT_ACTIVE while the task has a PENDING/RUNNING run
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/tasks/{taskId}/runs:
+    post:
+      tags: [Runs]
+      operationId: createRun
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRunRequest'
+      responses:
+        '202':
+          description: Run accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: RUN_NOT_ACTIVE while the task already has a PENDING/RUNNING run
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/tasks/{taskId}/bundle:
+    get:
+      tags: [Tasks]
+      operationId: exportTaskBundle
+      summary: Export every latest succeeded deliverable as one ZIP archive
+      description: >-
+        Streams a ZIP built in memory from the latest SUCCEEDED run of each mode, so a task with no
+        succeeded run of a given mode simply omits that entry. Always contains
+        00_项目交付清单与资产概览.md, plus 01_需求规格说明书_PRD.md, 02_产品交互原型_Demo.html,
+        03_需求评审与整改确认单_Review.md, 04_工作量评估与报价表_Estimate.xlsx,
+        05_系统测试用例清单_TestCase.xlsx, and 06_研发技术方案_TechSpec.md when present.
+        HTML and Markdown entries are delivered as inert text and must never be injected into the
+        workbench document.
+      security:
+        - SessionToken: []
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      responses:
+        '200':
+          description: application/zip archive with a UTF-8 encoded attachment filename
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v1/runs:
+    get:
+      tags: [Runs]
+      operationId: listRuns
+      security:
+        - SessionToken: []
+      parameters:
+        - name: mode
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/RunMode'
+        - name: taskId
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Review and generation records for the current user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RunHistoryItem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v1/runs/{runId}:
+    get:
+      tags: [Runs]
+      operationId: getRun
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+      responses:
+        '200':
+          description: Current run state and optional result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v1/runs/{runId}/confirm:
+    post:
+      tags: [Runs]
+      operationId: confirmRunResult
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+      responses:
+        '200':
+          description: Result marked as accepted by the local user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/v1/runs/{runId}/export-estimate:
+    post:
+      tags: [Runs]
+      operationId: exportEstimateExcel
+      summary: Export ESTIMATE result as single-sheet XLSX workbook
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+      responses:
+        '200':
+          description: Formatted .xlsx workbook stream
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    get:
+      tags: [Runs]
+      operationId: exportEstimateExcelGet
+      summary: Export ESTIMATE result as single-sheet XLSX workbook via GET
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+        - name: dailyRate
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: title
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Formatted .xlsx workbook stream
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v1/runs/{runId}/export-test-cases:
+    post:
+      tags: [Runs]
+      operationId: exportTestCaseExcel
+      summary: Export a TEST_CASE result as a single-sheet XLSX workbook
+      description: >-
+        Only a TEST_CASE run can be exported. The workbook keeps the KPI block, the per-module
+        subtotal banner, and the grand total row; request.columns narrows or reorders the detail
+        columns. The download filename is derived from the request title, or payload.title when absent.
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportTestCaseRequest'
+      responses:
+        '200':
+          description: Formatted .xlsx workbook stream
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: INVALID_REQUEST when the run mode is not TEST_CASE
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    get:
+      tags: [Runs]
+      operationId: exportTestCaseExcelGet
+      summary: Export a TEST_CASE result as a single-sheet XLSX workbook via GET
+      description: Convenience variant for direct browser download; it only accepts a title override.
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+        - name: title
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 200
+      responses:
+        '200':
+          description: Formatted .xlsx workbook stream
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: INVALID_REQUEST when the run mode is not TEST_CASE
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v1/runs/{runId}/export-tech-spec:
+    post:
+      tags: [Runs]
+      operationId: exportTechSpecMarkdown
+      summary: Export a TECH_SPEC result as a complete deliverable Markdown document
+      description: >-
+        Only a TECH_SPEC run can be exported. The Markdown includes delivery notes, KPI overview,
+        architecture (and optional modules/*.md), database tables with columns/indexes, and API contracts
+        with request/response samples and error codes. Legacy results may still contain an optional tasks section.
+        The download filename is derived from the request title, or payload.title when absent.
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportTechSpecRequest'
+      responses:
+        '200':
+          description: UTF-8 Markdown document stream
+          content:
+            text/markdown:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: INVALID_REQUEST when the run mode is not TECH_SPEC
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    get:
+      tags: [Runs]
+      operationId: exportTechSpecMarkdownGet
+      summary: Export a TECH_SPEC result as Markdown via GET
+      description: Convenience variant for direct browser download; it only accepts a title override.
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+        - name: title
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 200
+      responses:
+        '200':
+          description: UTF-8 Markdown document stream
+          content:
+            text/markdown:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: INVALID_REQUEST when the run mode is not TECH_SPEC
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v1/runs/{runId}/review-feedback:
+    get:
+      tags: [Runs]
+      operationId: getReviewFeedback
+      description: Read user decisions attached to a succeeded REVIEW result. This never rewrites the result or current PRD.
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+      responses:
+        '200':
+          description: Current complete feedback collection and revision
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewFeedbackResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Runs]
+      operationId: updateReviewFeedback
+      description: Replace the complete feedback collection using optimistic revision control.
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReviewFeedbackRequest'
+      responses:
+        '200':
+          description: Feedback saved and revision incremented
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewFeedbackResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: FEEDBACK_CHANGED, or RUN_NOT_ACTIVE while the task has a PENDING/RUNNING run
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /internal/v1/runs/{runId}/sources:
+    get:
+      tags: [HermesTools]
+      operationId: listRunSources
+      security:
+        - PluginKey: []
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+      responses:
+        '200':
+          description: Sources visible to the current run
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [runId, sources]
+                properties:
+                  runId:
+                    type: string
+                  sources:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ToolSourceSummary'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /internal/v1/runs/{runId}/sources/{sourceId}:
+    get:
+      tags: [HermesTools]
+      operationId: readRunSource
+      security:
+        - PluginKey: []
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+        - $ref: '#/components/parameters/SourceId'
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Opaque text cursor returned by the previous page.
+      responses:
+        '200':
+          description: A page of normalized source text
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourcePageResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /internal/v1/runs/{runId}/result:
+    post:
+      tags: [HermesTools]
+      operationId: submitRunResult
+      security:
+        - PluginKey: []
+      parameters:
+        - $ref: '#/components/parameters/RunId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitResultRequest'
+      responses:
+        '202':
+          description: Hermes result accepted without business re-evaluation
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [accepted]
+                properties:
+                  accepted:
+                    type: boolean
+                    const: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+components:
+  securitySchemes:
+    SessionToken:
+      type: http
+      scheme: bearer
+    PluginKey:
+      type: apiKey
+      in: header
+      name: X-PRD-Plugin-Key
+  parameters:
+    TaskId:
+      name: taskId
+      in: path
+      required: true
+      schema:
+        type: string
+        maxLength: 64
+    SourceId:
+      name: sourceId
+      in: path
+      required: true
+      schema:
+        type: string
+        maxLength: 64
+    RunId:
+      name: runId
+      in: path
+      required: true
+      schema:
+        type: string
+        maxLength: 64
+  schemas:
+    ClientEventRequest:
+      type: object
+      required: [module, action]
+      properties:
+        eventType: {type: string, enum: [USER_ACTION, CLIENT_ERROR]}
+        module: {type: string, maxLength: 32, pattern: '^[A-Z_]+$'}
+        action: {type: string, maxLength: 64, pattern: '^[A-Z_]+$'}
+        status: {type: string, enum: [SUCCEEDED, FAILED, PENDING, RUNNING]}
+        durationMs: {type: integer, minimum: 0, maximum: 86400000}
+        errorCode: {type: string, maxLength: 64, pattern: '^[A-Z][A-Z0-9_]*$'}
+        errorMessage: {type: string, maxLength: 500, description: Discarded; never persisted}
+        metadata:
+          type: object
+          maxProperties: 10
+          description: Only bounded taskId/runId, completeness and source/file counts are retained
+    MonitoredFailureStat:
+      type: object
+      required: [module, errorCode, count, lastOccurredAt]
+      properties:
+        module:
+          type: string
+          enum: [GENERATE, POC, TEST_CASE, TECH_SPEC, REVIEW]
+        errorCode:
+          type: string
+        count:
+          type: integer
+          format: int64
+        lastOccurredAt:
+          type: string
+          format: date-time
+    MonitoredFailure:
+      type: object
+      required: [id, taskId, module, action, createdAt]
+      properties:
+        id:
+          type: string
+          description: Run ID
+        taskId:
+          type: string
+        taskTitle:
+          type: [string, 'null']
+        userId:
+          type: [string, 'null']
+        username:
+          type: [string, 'null']
+        module:
+          type: string
+          enum: [GENERATE, POC, TEST_CASE, TECH_SPEC, REVIEW]
+        action:
+          type: string
+          const: RUN_FAILED
+        errorCode:
+          type: [string, 'null']
+        errorMessage:
+          type: [string, 'null']
+        createdAt:
+          type: string
+          format: date-time
+          description: Failure finish time
+    AdminDashboardResponse:
+      type: object
+      required: [overview, users, features, errorStats, recentErrors]
+      properties:
+        overview:
+          type: object
+          required: [totalUsers, activeUsersToday, totalTasks, totalRuns, totalRunsSucceeded, totalRunsFailed, successRate, totalErrors]
+          properties:
+            totalUsers: { type: integer, format: int64 }
+            activeUsersToday: { type: integer, format: int64 }
+            totalTasks: { type: integer, format: int64 }
+            totalRuns: { type: integer, format: int64 }
+            totalRunsSucceeded: { type: integer, format: int64 }
+            totalRunsFailed: { type: integer, format: int64 }
+            successRate: { type: number }
+            totalErrors:
+              type: integer
+              format: int64
+              description: All-time failed runs in the five monitored modes
+        users:
+          type: array
+          items: { type: object }
+        features:
+          type: array
+          items: { type: object }
+        errorStats:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonitoredFailureStat'
+        recentErrors:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonitoredFailure'
+    RunMode:
+      type: string
+      description: >-
+        Run mode. GENERATE writes the PRD. Other modes prefer the current draft when one exists;
+        REVIEW, DEMO, POC, ESTIMATE, TEST_CASE, and TECH_SPEC can also start from uploaded materials
+        without a preceding GENERATE run. POC produces a static multi-file admin demo.
+      enum: [REVIEW, GENERATE, DEMO, POC, ESTIMATE, TEST_CASE, TECH_SPEC]
+    HealthResponse:
+      type: object
+      required: [status, hermes]
+      properties:
+        status:
+          type: string
+          enum: [UP, DOWN]
+        hermes:
+          type: string
+          enum: [CONNECTED, UNAVAILABLE]
+    RegisterRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 32
+        password:
+          type: string
+          minLength: 8
+          maxLength: 72
+          description: At least 8 Unicode characters and at most 72 UTF-8 bytes; overlong registration is rejected.
+        displayName:
+          type: string
+          maxLength: 64
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          maxLength: 4096
+          description: Valid requests longer than 72 UTF-8 bytes fail authentication (401); inputs exceeding 4096 characters are rejected as invalid (400). No truncation or normalization.
+    UserResponse:
+      type: object
+      required: [id, username, displayName]
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        displayName:
+          type: string
+    AuthResponse:
+      type: object
+      required: [token, expiresAt, user]
+      properties:
+        token:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        user:
+          $ref: '#/components/schemas/UserResponse'
+    CreateTaskRequest:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+      additionalProperties: false
+    RenameTaskRequest:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+      additionalProperties: false
+    DemoSkill:
+      type: object
+      required: [id, name, description]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+    DemoPackageFiles:
+      type: object
+      description: >-
+        Optional UTF-8 text attachments; no private host protocol or build guarantee. The browser
+        displays and zips these files locally; the full DEMO payload, including html and this map,
+        must not exceed 20 MiB (20,971,520 bytes). The service rejects absolute paths, traversal,
+        environment/credential files, non-text values, and obvious credential assignments.
+      propertyNames:
+        type: string
+        minLength: 1
+        maxLength: 512
+        pattern: '^(?!/)(?![A-Za-z]:)(?!.*\\)(?!.*//)(?!.*\/$)(?!.*(^|/)\.\.?(/|$)).+$'
+      additionalProperties:
+        type: string
+    DemoResultPayload:
+      type: object
+      required: [mode, title, summary, html]
+      properties:
+        mode:
+          const: DEMO
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        summary:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        html:
+          type: string
+          minLength: 1
+        scriptMarkdown:
+          type: string
+          maxLength: 30000
+        skill:
+          type: string
+          maxLength: 64
+          default: generic-admin-html
+        package_files:
+          $ref: '#/components/schemas/DemoPackageFiles'
+      not:
+        required: [packageFiles]
+      additionalProperties: true
+    QualityOption:
+      type: object
+      required: [id, name, description, default]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        costHint:
+          type: string
+        default:
+          type: boolean
+    QualityOptions:
+      type: object
+      required: [completeness, lenses]
+      properties:
+        completeness:
+          type: array
+          items:
+            $ref: '#/components/schemas/QualityOption'
+        lenses:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/QualityOption'
+    TaskResponse:
+      type: object
+      required: [id, title, sources, createdAt]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        sources:
+          type: array
+          items:
+            $ref: '#/components/schemas/SourceResponse'
+        createdAt:
+          type: string
+          format: date-time
+    TaskSummary:
+      type: object
+      required: [id, title, createdAt]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    SourceResponse:
+      type: object
+      required: [id, taskId, name, mediaType, size, status, createdAt]
+      properties:
+        id:
+          type: string
+        taskId:
+          type: string
+        name:
+          type: string
+        mediaType:
+          type: string
+        size:
+          type: integer
+          format: int64
+        status:
+          type: string
+          enum: [READY, FAILED]
+        createdAt:
+          type: string
+          format: date-time
+    DraftSourceResponse:
+      type: object
+      required: [sourceId, runId, content, updatedAt]
+      properties:
+        sourceId:
+          type: string
+          maxLength: 64
+        runId:
+          type: string
+          maxLength: 64
+        content:
+          type: string
+          minLength: 1
+          maxLength: 500000
+        updatedAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+    UpdateDraftSourceRequest:
+      type: object
+      required: [content, expectedUpdatedAt]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 500000
+          description: Saved verbatim after the service rejects content that is blank after trimming.
+        expectedUpdatedAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+    ToolSourceSummary:
+      type: object
+      required: [sourceId, name, size]
+      properties:
+        sourceId:
+          type: string
+        name:
+          type: string
+        size:
+          type: integer
+          format: int64
+    CreateRunRequest:
+      type: object
+      required: [mode]
+      properties:
+        mode:
+          $ref: '#/components/schemas/RunMode'
+        instruction:
+          type: string
+          maxLength: 4000
+          default: ''
+        skill:
+          type: string
+          maxLength: 64
+          description: Demo style skill id, default generic-admin-html
+          default: generic-admin-html
+        completeness:
+          type: string
+          enum: [QUICK, STANDARD, THOROUGH]
+          default: STANDARD
+          description: Output completeness. Omitted values default to STANDARD.
+        lenses:
+          type: array
+          items:
+            type: string
+            maxLength: 64
+          description: Optional focus lens ids. Omit to use mode defaults; send [] for none.
+        reviseFromRunId:
+          type: string
+          maxLength: 64
+          description: GENERATE only. Revise this succeeded GENERATE run instead of writing from scratch.
+      additionalProperties: false
+    RunResponse:
+      type: object
+      required: [id, taskId, mode, status, createdAt]
+      properties:
+        id:
+          type: string
+        taskId:
+          type: string
+        parentRunId:
+          type: [string, 'null']
+        mode:
+          $ref: '#/components/schemas/RunMode'
+        completeness:
+          type: string
+          enum: [QUICK, STANDARD, THOROUGH]
+        lenses:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [PENDING, RUNNING, SUCCEEDED, FAILED]
+        stage:
+          type: [string, 'null']
+          enum: [null, READING, ANALYZING, SUBMITTING]
+        result:
+          oneOf:
+            - type: 'null'
+            - type: object
+              additionalProperties: true
+        error:
+          type: [string, 'null']
+        accepted:
+          type: boolean
+          default: false
+        createdAt:
+          type: string
+          format: date-time
+        finishedAt:
+          type: [string, 'null']
+          format: date-time
+    RunHistoryItem:
+      type: object
+      required: [id, taskId, taskTitle, mode, status, createdAt]
+      properties:
+        id:
+          type: string
+        taskId:
+          type: string
+        taskTitle:
+          type: string
+        mode:
+          $ref: '#/components/schemas/RunMode'
+        status:
+          type: string
+          enum: [PENDING, RUNNING, SUCCEEDED, FAILED]
+        summary:
+          type: [string, 'null']
+        error:
+          type: [string, 'null']
+        accepted:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        finishedAt:
+          type: [string, 'null']
+          format: date-time
+    ReviewFeedbackItem:
+      type: object
+      required: [itemPath, action]
+      properties:
+        itemPath:
+          type: string
+          pattern: '^(blockingIssues|otherSuggestions)/(0|[1-9][0-9]*)$'
+          maxLength: 100
+        action:
+          type: string
+          enum: [EDITED, WONT_DO, NEEDS_CUSTOMER]
+        note:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description: Omit when EDITED has no explanation; clients must not send an empty string
+      allOf:
+        - if:
+            properties:
+              action:
+                enum: [WONT_DO, NEEDS_CUSTOMER]
+            required: [action]
+          then:
+            required: [note]
+      additionalProperties: false
+    UpdateReviewFeedbackRequest:
+      type: object
+      description: Complete replacement payload; itemPath values must be unique within the items collection, and the serialized request is limited to 100 KB by the service.
+      required: [expectedRevision, items]
+      properties:
+        expectedRevision:
+          type: integer
+          minimum: 0
+        items:
+          type: array
+          maxItems: 150
+          items:
+            $ref: '#/components/schemas/ReviewFeedbackItem'
+      additionalProperties: false
+    ReviewFeedbackResponse:
+      type: object
+      required: [runId, revision, items]
+      properties:
+        runId:
+          type: string
+          maxLength: 64
+        revision:
+          type: integer
+          minimum: 0
+        items:
+          type: array
+          maxItems: 150
+          items:
+            $ref: '#/components/schemas/ReviewFeedbackItem'
+      additionalProperties: false
+    SourcePageResponse:
+      type: object
+      required: [sourceId, name, content]
+      properties:
+        sourceId:
+          type: string
+        name:
+          type: string
+        content:
+          type: string
+        nextCursor:
+          type: [string, 'null']
+    SubmitResultRequest:
+      type: object
+      required: [mode, payload]
+      properties:
+        mode:
+          $ref: '#/components/schemas/RunMode'
+        payload:
+          oneOf:
+            - $ref: '#/components/schemas/DemoResultPayload'
+            - type: object
+              required: [mode]
+              properties:
+                mode:
+                  $ref: '#/components/schemas/RunMode'
+                  not:
+                    const: DEMO
+              additionalProperties: true
+          description: >-
+            Result object for the requested mode. DEMO payloads are validated against
+            DemoResultPayload; other mode schemas remain in the corresponding contracts/*.schema.json
+            files. The complete DEMO payload has a hard limit of 20 MiB (20,971,520 bytes).
+      additionalProperties: false
+    ExportTestCaseColumn:
+      type: object
+      required: [key]
+      properties:
+        key:
+          type: string
+          maxLength: 64
+          description: >-
+            Column key. Known keys are index, caseId, module, subModule, title, type, priority,
+            precondition, steps, testData, expectedResult, and description; any other key reads a
+            matching custom field from each item.
+        title:
+          type: string
+          maxLength: 100
+          description: Header text; falls back to the default title for a known key, otherwise to key.
+        visible:
+          type: boolean
+          default: true
+          description: False removes the column. An empty or fully hidden list falls back to all default columns.
+      additionalProperties: false
+    ExportTestCaseRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 200
+          description: Workbook title and download filename stem; falls back to payload.title.
+        columns:
+          type: array
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/ExportTestCaseColumn'
+        customHeaders:
+          type: array
+          maxItems: 50
+          items:
+            type: string
+            maxLength: 100
+          description: Extra header titles for custom fields carried on each item.
+        extraFieldValues:
+          type: object
+          additionalProperties:
+            type: string
+    ExportTechSpecRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 200
+          description: Markdown title and download filename stem; falls back to payload.title.
+      additionalProperties: false
+    UpdateLogItem:
+      type: object
+      required: [title, detail]
+      properties:
+        title:
+          type: string
+        detail:
+          type: string
+        type:
+          type: string
+          enum: [feature, improve, fix, security]
+          default: feature
+        tone:
+          type: string
+          enum: [accent, blue, amber]
+          default: accent
+      additionalProperties: false
+    UpdateLog:
+      type: object
+      required: [id, version, releaseDate, title, summary, highlights, items, isLatest, status]
+      properties:
+        id:
+          type: string
+        version:
+          type: string
+        releaseDate:
+          type: string
+        title:
+          type: string
+        summary:
+          type: string
+        highlights:
+          type: array
+          items:
+            type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateLogItem'
+        isLatest:
+          type: boolean
+        status:
+          type: string
+          enum: [PUBLISHED, DRAFT]
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+    UpdateLogSummaryResponse:
+      type: object
+      properties:
+        latest:
+          $ref: '#/components/schemas/UpdateLog'
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateLog'
+      additionalProperties: false
+    CreateUpdateLogRequest:
+      type: object
+      required: [version, releaseDate, title, summary, items]
+      properties:
+        version:
+          type: string
+        releaseDate:
+          type: string
+        title:
+          type: string
+        summary:
+          type: string
+        highlights:
+          type: array
+          items:
+            type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateLogItem'
+        isLatest:
+          type: boolean
+        status:
+          type: string
+          enum: [PUBLISHED, DRAFT]
+      additionalProperties: false
+    UpdateUpdateLogRequest:
+      type: object
+      required: [version, releaseDate, title, summary, items]
+      properties:
+        version:
+          type: string
+        releaseDate:
+          type: string
+        title:
+          type: string
+        summary:
+          type: string
+        highlights:
+          type: array
+          items:
+            type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateLogItem'
+        isLatest:
+          type: boolean
+        status:
+          type: string
+          enum: [PUBLISHED, DRAFT]
+      additionalProperties: false
+    UpdateStatusRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [PUBLISHED, DRAFT]
+        isLatest:
+          type: boolean
+      additionalProperties: false
+    ErrorResponse:
+      type: object
+      required: [code, message, requestId]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        requestId:
+          type: string
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Current state does not allow the operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    PayloadTooLarge:
+      description: File or result exceeds the local Spike limit
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Login required or session expired
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

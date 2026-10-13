@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hermes-prd-workbench:schema:estimate-result-spike.json",
+  "title": "Hermes Workload Estimate Result - Spike",
+  "type": "object",
+  "required": [
+    "mode",
+    "title",
+    "summary",
+    "scopeNote",
+    "items"
+  ],
+  "properties": {
+    "mode": {
+      "const": "ESTIMATE"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "scopeNote": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000,
+      "description": "State the actual scope, assumptions and exclusions. If the user supplies no scope, development-self-test-v1 is the example; explicit user scope takes precedence. The control plane does not judge or rewrite scope."
+    },
+    "devDays": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Optional Agent-supplied non-negative effort in person-days. Stored as supplied; the service does not calculate, replace or reconcile totals."
+    },
+    "testDays": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Optional Agent-supplied non-negative effort in person-days. Stored as supplied; the service does not calculate, replace or reconcile totals."
+    },
+    "totalDays": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Optional Agent-supplied non-negative effort in person-days. Stored as supplied; the service does not calculate, replace or reconcile totals."
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Nonempty estimated page/interface items based on materials. No fixed item count is prescribed.",
+      "items": {
+        "$ref": "#/$defs/item"
+      }
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "item": {
+      "type": "object",
+      "required": [
+        "module",
+        "name",
+        "type",
+        "devDays",
+        "testDays"
+      ],
+      "properties": {
+        "module": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "First-level module name."
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Canonical item name. Runtime validation also accepts feature/title aliases without rewriting the original payload."
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "PAGE",
+            "API",
+            "THIRD_PARTY_API"
+          ],
+          "description": "Canonical type values. Runtime validation accepts documented page/API synonyms without normalizing the saved payload."
+        },
+        "devDays": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Development effort in person-days."
+        },
+        "testDays": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Self-test effort in person-days. Runtime validation accepts qaDays as an alias without rewriting the original payload."
+        },
+        "totalDays": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Optional Agent-supplied non-negative total, retained as supplied; not derived or reconciled by the service."
+        },
+        "complexity": {
+          "type": "string",
+          "description": "Optional Agent-supplied complexity label. Producers may use SIMPLE/MEDIUM/COMPLEX; other textual labels are retained without normalization."
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Optional explanation, retained as supplied."
+        },
+        "detail": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Optional detailed explanation, retained as supplied."
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

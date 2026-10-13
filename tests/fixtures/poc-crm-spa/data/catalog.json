@@ -1,0 +1,54 @@
+{
+  "modules": [
+    {
+      "key": "customers",
+      "title": "客户档案",
+      "core": true,
+      "columns": ["编号", "客户", "负责人", "等级", "状态"],
+      "fields": ["id", "name", "owner", "level", "status", "phone", "city"],
+      "labels": {
+        "id": "编号",
+        "name": "客户",
+        "owner": "负责人",
+        "level": "等级",
+        "status": "状态",
+        "phone": "电话",
+        "city": "城市"
+      },
+      "states": ["公海", "跟进中", "成交"],
+      "actions": ["create", "edit", "detail", "flow", "del"]
+    },
+    {
+      "key": "orders",
+      "title": "销售订单",
+      "core": false,
+      "columns": ["单号", "客户", "金额", "状态"],
+      "fields": ["id", "customer", "amount", "status", "owner"],
+      "labels": {
+        "id": "单号",
+        "customer": "客户",
+        "amount": "金额",
+        "status": "状态",
+        "owner": "负责人"
+      },
+      "states": ["草稿", "待审", "已发"],
+      "actions": ["create", "edit", "del"]
+    },
+    {
+      "key": "products",
+      "title": "产品目录",
+      "core": false,
+      "columns": ["编号", "名称", "规格", "单价", "库存"],
+      "fields": ["id", "name", "spec", "price", "stock"],
+      "labels": {
+        "id": "编号",
+        "name": "名称",
+        "spec": "规格",
+        "price": "单价",
+        "stock": "库存"
+      },
+      "states": [],
+      "actions": ["create", "edit", "del"]
+    }
+  ]
+}

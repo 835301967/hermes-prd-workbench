@@ -1,0 +1,294 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hermes-prd-workbench:schema:tech-spec-result-spike.json",
+  "title": "Hermes Technical Solution Result - Spike",
+  "type": "object",
+  "required": [
+    "mode",
+    "title",
+    "summary",
+    "architectureMarkdown",
+    "databaseTables",
+    "apiEndpoints"
+  ],
+  "properties": {
+    "mode": {
+      "const": "TECH_SPEC"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "architectureMarkdown": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500000,
+      "description": "Layered architecture write-up. May embed ```mermaid blocks; the workbench renders them natively after sanitizing the Markdown."
+    },
+    "totalTasks": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Legacy optional display statistic. New TECH_SPEC runs do not produce work-order breakdowns."
+    },
+    "frontendTasks": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Legacy optional display statistic; not recalculated by the control plane."
+    },
+    "backendTasks": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Legacy optional display statistic; not recalculated by the control plane."
+    },
+    "middlewareTasks": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Legacy optional display statistic; not recalculated by the control plane."
+    },
+    "totalDevDays": {
+      "type": "number",
+      "minimum": 0,
+      "multipleOf": 0.1,
+      "description": "Legacy optional display statistic; not recalculated by the control plane."
+    },
+    "databaseTables": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/databaseTable"
+      },
+      "description": "Physical or logical data models assembled from data/tables.json. Browser-only solutions may describe local data structures and state explicitly that server databases are not applicable."
+    },
+    "apiEndpoints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/apiEndpoint"
+      },
+      "description": "HTTP endpoints or local/view adapter contracts assembled from data/apis.json. Method labels are preserved, not converted into HTTP endpoints."
+    },
+    "workspaceFile": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 512
+      },
+      "maxItems": 200
+    },
+    "tech_spec_files": {
+      "type": "object",
+      "description": "Assembled TECH_SPEC pack. Keys are relative POSIX paths (README.md, architecture.md, data/*.json, modules/*). Historical results may omit this field.",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "description": "Legacy work orders. New runs should omit this field; if present for historical results, items must be objects.",
+      "items": {
+        "$ref": "#/$defs/task"
+      }
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "databaseTable": {
+      "type": "object",
+      "required": [
+        "tableName"
+      ],
+      "properties": {
+        "tableName": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "tableComment": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "columns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/column"
+          },
+          "default": []
+        },
+        "indexes": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "object",
+                "additionalProperties": true
+              }
+            ],
+            "description": "Text or structured index intent, displayed without modifying the stored result."
+          },
+          "default": []
+        }
+      },
+      "additionalProperties": true
+    },
+    "column": {
+      "type": "object",
+      "required": [
+        "name",
+        "type"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "type": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "nullable": {
+          "type": "boolean",
+          "default": true
+        },
+        "comment": {
+          "type": "string",
+          "maxLength": 300
+        }
+      },
+      "additionalProperties": true
+    },
+    "apiEndpoint": {
+      "type": "object",
+      "required": [
+        "method",
+        "path",
+        "summary"
+      ],
+      "properties": {
+        "method": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32,
+          "description": "Method or adapter label, including HTTP methods, LOCAL and VIEW. The control plane does not infer or rewrite a transport."
+        },
+        "path": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "summary": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "requestBody": {
+          "type": "string",
+          "maxLength": 8000,
+          "description": "Compact JSON sample serialized as a string, not a nested object."
+        },
+        "responseBody": {
+          "type": "string",
+          "maxLength": 8000,
+          "description": "Compact JSON sample serialized as a string, not a nested object."
+        },
+        "errorCodes": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 8000
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 100
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                ]
+              }
+            }
+          ],
+          "description": "Original error-code text or structured list; consumers render as text without normalization."
+        }
+      },
+      "additionalProperties": true
+    },
+    "task": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "taskId": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Work order number such as DEV-BE-001. The producer should submit the canonical taskId field; compatibility aliases are not rewritten."
+        },
+        "module": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "First-level module supplied by the producer. The control plane does not synthesize it."
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Task name. The producer should submit the canonical name field; compatibility aliases are only read for validation."
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "FRONTEND",
+            "BACKEND",
+            "MIDDLEWARE"
+          ],
+          "description": "Canonical side of the work supplied by the producer. The control plane does not normalize synonyms."
+        },
+        "priority": {
+          "type": "string",
+          "enum": [
+            "P0",
+            "P1",
+            "P2"
+          ],
+          "description": "Canonical priority supplied by the producer. The control plane does not normalize synonyms."
+        },
+        "devDays": {
+          "type": "number",
+          "minimum": 0,
+          "multipleOf": 0.1,
+          "description": "Development effort in person-days. The producer should submit the canonical devDays field; aliases are not rewritten."
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "default": [],
+          "description": "Preceding work order numbers supplied by the producer. If present, this field must be an array."
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Implementation points supplied by the producer. The control plane does not synthesize a description."
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

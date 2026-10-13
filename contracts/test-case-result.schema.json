@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hermes-prd-workbench:schema:test-case-result-spike.json",
+  "title": "Hermes Test Case Generation Result - Spike",
+  "type": "object",
+  "required": ["mode", "title", "summary", "items"],
+  "properties": {
+    "mode": { "const": "TEST_CASE" },
+    "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "summary": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "scopeNote": {
+      "type": "string",
+      "maxLength": 4000,
+      "description": "Coverage boundary statement supplied by the Agent. The control plane preserves it as submitted."
+    },
+    "totalCount": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Optional producer-supplied display statistic. The control plane does not recalculate or rewrite it."
+    },
+    "p0Count": { "type": "integer", "minimum": 0, "description": "Optional producer-supplied display statistic; not recalculated by the control plane." },
+    "p1Count": { "type": "integer", "minimum": 0, "description": "Optional producer-supplied display statistic; not recalculated by the control plane." },
+    "p2Count": { "type": "integer", "minimum": 0, "description": "Optional producer-supplied display statistic; not recalculated by the control plane." },
+    "boundaryCount": { "type": "integer", "minimum": 0, "description": "Optional producer-supplied display statistic; not recalculated by the control plane." },
+    "exceptionCount": { "type": "integer", "minimum": 0, "description": "Optional producer-supplied display statistic; not recalculated by the control plane." },
+    "customHeaders": {
+      "type": "array",
+      "items": { "type": "string", "maxLength": 100 },
+      "description": "Suggested Excel headers. Defaults to 用例编号, 一级模块, 二级模块, 用例标题, 测试类型, 优先级, 前置条件, 操作步骤, 测试数据, 预期结果 when missing or empty."
+    },
+    "moduleSummaries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/moduleSummary" },
+      "description": "Per first-level module subtotals. The service derives them from items when missing or empty."
+    },
+    "workspaceFile": { "type": "string", "maxLength": 256 },
+    "files": {
+      "type": "array",
+      "items": { "type": "string", "maxLength": 512 },
+      "maxItems": 200
+    },
+    "test_case_files": {
+      "type": "object",
+      "description": "Assembled TEST_CASE pack. Keys are relative POSIX paths (README.md, data/catalog.json, modules/*.json). Historical results may omit this field and only carry items.",
+      "additionalProperties": { "type": "string" }
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Case list assembled from modules/*.json (or legacy single-JSON submit). No fixed item cap; coverage depth follows quality mode.",
+      "items": { "$ref": "#/$defs/item" }
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "moduleSummary": {
+      "type": "object",
+      "required": ["module"],
+      "properties": {
+        "module": { "type": "string", "maxLength": 200 },
+        "subModule": { "type": "string", "maxLength": 200 },
+        "totalCount": { "type": "integer", "minimum": 0 },
+        "p0Count": { "type": "integer", "minimum": 0 },
+        "p1Count": { "type": "integer", "minimum": 0 },
+        "p2Count": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": true
+    },
+    "item": {
+      "type": "object",
+      "required": ["module", "title", "expectedResult"],
+      "properties": {
+        "caseId": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Case number such as TC-M01-001. The producer should submit the canonical caseId field; compatibility aliases are not rewritten."
+        },
+        "module": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "First-level module. The producer should submit the canonical module field; compatibility aliases are only read for validation."
+        },
+        "subModule": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Second-level module supplied by the producer. The control plane does not synthesize it."
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Case title. The producer should submit the canonical title field; compatibility aliases are not rewritten."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["FUNCTION", "BOUNDARY", "EXCEPTION", "PERMISSION", "CONCURRENCY"],
+          "description": "Canonical test type supplied by the producer. The control plane does not normalize synonyms."
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["P0", "P1", "P2"],
+          "description": "Canonical priority supplied by the producer. The control plane does not normalize synonyms."
+        },
+        "precondition": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Precondition supplied by the producer. The control plane does not synthesize a default."
+        },
+        "steps": {
+          "oneOf": [
+            { "type": "string", "maxLength": 4000 },
+            {
+              "type": "array",
+              "items": { "type": "string", "maxLength": 1000 }
+            }
+          ],
+          "description": "Operation steps supplied by the producer. Arrays are preserved as arrays."
+        },
+        "testData": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Test data supplied by the producer. The control plane does not synthesize a placeholder."
+        },
+        "expectedResult": {
+          "type": "string",
+          "maxLength": 4000,
+          "description": "Expected result. The producer should submit the canonical expectedResult field; compatibility aliases are only read for validation."
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 2000,
+          "description": "Design focus of the case, rendered as 设计关注点/说明 in Excel."
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

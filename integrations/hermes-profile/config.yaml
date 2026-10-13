@@ -1,0 +1,95 @@
+# Hermes Agent v0.16.0 profile configuration for PRD product runs.
+# API_SERVER_* and all secrets are runtime environment variables, not config keys.
+
+# scripts/configure-profile.py fills these non-secret fields from deployment configuration.
+model:
+  default: configure-your-model
+  provider: custom:workbench
+  base_url: ''
+  max_tokens: 24576
+
+providers:
+  workbench:
+    name: Workbench model service
+    api: https://api.example.invalid/v1
+    key_env: PRD_MODEL_API_KEY
+    transport: chat_completions
+    default_model: configure-your-model
+
+plugins:
+  enabled:
+    - prd-workbench
+
+platform_toolsets:
+  api_server:
+    - prd_workbench
+
+agent:
+  max_turns: 180
+  gateway_timeout: 3600
+  restart_drain_timeout: 30
+  api_max_retries: 2
+  tool_use_enforcement: auto
+  task_completion_guidance: true
+  environment_probe: false
+  disabled_toolsets:
+    - web
+    - browser
+    - terminal
+    - file
+    - code_execution
+    - vision
+    - image_gen
+    - video
+    - video_gen
+    - x_search
+    - moa
+    - tts
+    - skills
+    - todo
+    - memory
+    - session_search
+    - context_engine
+    - clarify
+    - delegation
+    - cronjob
+    - messaging
+    - homeassistant
+    - spotify
+    - yuanbao
+    - computer_use
+  reasoning_effort: low
+  verbose: false
+
+checkpoints:
+  enabled: false
+
+# Hermes v0.16 enables the background skill curator by default. Product Runs
+# must not start auxiliary agents or mutate Profile skills.
+curator:
+  enabled: false
+
+tool_output:
+  max_bytes: 200000
+  max_lines: 500
+  max_line_length: 4000
+
+tool_loop_guardrails:
+  warnings_enabled: true
+  hard_stop_enabled: true
+  warn_after:
+    exact_failure: 2
+    same_tool_failure: 3
+    idempotent_no_progress: 2
+  hard_stop_after:
+    exact_failure: 4
+    same_tool_failure: 5
+    idempotent_no_progress: 4
+
+compression:
+  enabled: false
+  threshold: 0.65
+  target_ratio: 0.25
+  protect_last_n: 16
+  protect_first_n: 3
+  abort_on_summary_failure: true

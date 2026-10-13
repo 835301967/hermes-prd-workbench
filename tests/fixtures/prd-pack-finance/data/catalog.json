@@ -1,0 +1,20 @@
+{
+  "modules": [
+    {
+      "key": "voucher",
+      "title": "凭证管理",
+      "core": true,
+      "pages": ["凭证列表", "凭证录入", "凭证详情"],
+      "entities": ["凭证", "分录"],
+      "states": ["草稿", "已审核", "已记账"]
+    },
+    {
+      "key": "ledger",
+      "title": "账簿查询",
+      "core": false,
+      "pages": ["明细账", "总账"],
+      "entities": ["科目余额"],
+      "states": ["未结账", "已结账"]
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "customers": [
+    {
+      "id": "C-001",
+      "name": "虚构客户1",
+      "owner": "样例销售1",
+      "level": "A",
+      "status": "跟进中",
+      "phone": "000-0000-0000",
+      "city": "测试地区"
+    },
+    {
+      "id": "C-002",
+      "name": "虚构客户2",
+      "owner": "样例销售2",
+      "level": "B",
+      "status": "公海",
+      "phone": "000-0000-0000",
+      "city": "测试地区"
+    },
+    {
+      "id": "C-003",
+      "name": "虚构客户3",
+      "owner": "样例销售1",
+      "level": "A",
+      "status": "成交",
+      "phone": "000-0000-0000",
+      "city": "测试地区"
+    },
+    {
+      "id": "C-004",
+      "name": "虚构客户4",
+      "owner": "样例销售2",
+      "level": "C",
+      "status": "跟进中",
+      "phone": "000-0000-0000",
+      "city": "测试地区"
+    }
+  ],
+  "orders": [
+    {
+      "id": "SO-001",
+      "customer": "虚构客户1",
+      "amount": 128000,
+      "status": "待审",
+      "owner": "样例销售1"
+    },
+    {
+      "id": "SO-002",
+      "customer": "虚构客户3",
+      "amount": 56000,
+      "status": "已发",
+      "owner": "样例销售2"
+    },
+    {
+      "id": "SO-003",
+      "customer": "虚构客户2",
+      "amount": 9800,
+      "status": "草稿",
+      "owner": "样例销售1"
+    }
+  ],
+  "products": [
+    {
+      "id": "P-001",
+      "name": "工业清洗剂A",
+      "spec": "25kg",
+      "price": 380,
+      "stock": 120
+    },
+    {
+      "id": "P-002",
+      "name": "防锈油B",
+      "spec": "18L",
+      "price": 260,
+      "stock": 40
+    },
+    {
+      "id": "P-003",
+      "name": "表面处理液C",
+      "spec": "10kg",
+      "price": 510,
+      "stock": 8
+    }
+  ]
+}

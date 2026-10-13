@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hermes-prd-workbench:schema:poc-result-spike.json",
+  "title": "Hermes PRD POC Result - Spike",
+  "type": "object",
+  "required": ["mode", "title", "summary", "html", "poc_files"],
+  "properties": {
+    "mode": { "const": "POC" },
+    "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "summary": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "html": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Preview-only inlined HTML assembled by the control plane from workspace files. Agent submit_result must send workspaceFile and files names only."
+    },
+    "workspaceFile": { "type": "string", "const": "index.html" },
+    "files": {
+      "type": "array",
+      "description": "Relative workspace paths submitted by the Agent. The control plane loads bodies into poc_files.",
+      "items": { "type": "string", "minLength": 1, "maxLength": 512 },
+      "minItems": 1
+    },
+    "poc_files": {
+      "type": "object",
+      "description": "UTF-8 text map assembled from the POC sandbox. Allowed: index.html, css/*.css, js/**/*.js, data/*.json. Per-file 100KB, total 5MB.",
+      "required": ["index.html"],
+      "propertyNames": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 512,
+        "pattern": "^(index\\.html|css\\/[^/]+\\.css|js\\/.+\\.js|data\\/[^/]+\\.json)$"
+      },
+      "additionalProperties": { "type": "string" }
+    },
+    "scriptMarkdown": { "type": "string", "maxLength": 30000 },
+    "references": {
+      "type": "array",
+      "maxItems": 200,
+      "items": { "type": "object", "additionalProperties": true },
+      "default": []
+    }
+  },
+  "not": { "required": ["package_files"] },
+  "additionalProperties": true
+}

@@ -1,0 +1,14 @@
+# Changelog
+
+## 0.4.0-beta.1 — preview
+
+- Move applications to apps/backend and apps/web; centralize synthetic fixtures and public documentation.
+- Replace company defaults and private host scaffolding with a portable HTML template and configurable model service.
+- Explicit local administrator bootstrap; remove fixed personal SQL privileges and secret output.
+- Static generated-code diagnostics, isolated new-tab preview, strict sanitized diagrams, opt-in bounded telemetry.
+- Compose deployment, lifecycle commands, contribution/security/license documentation and release checks.
+
+This is a fresh-install preview limited to macOS arm64 with Docker Desktop Linux containers. Validation evidence and release gates are recorded in docs/maintainers/change-report.md. Internal customer release notes are excluded.
+
+- Patch application dependencies, lock Hermes API runtime dependencies with hashes, and use a fresh MySQL 8.4 LTS volume.
+- Enforce BCrypt’s 72 UTF-8 byte boundary without silent password truncation.

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>示例 CRM POC</title>
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <div class="brand">Hermes · 示例 CRM 演示</div>
+      <span>售前可点主路径：客户档案 → 订单台账</span>
+    </header>
+    <div class="body">
+      <aside class="sider" id="sider"></aside>
+      <section class="main">
+        <div class="tabs" id="tabs"></div>
+        <div class="view" id="view"></div>
+      </section>
+    </div>
+  </div>
+  <script src="js/store.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/views/customers.js"></script>
+  <script src="js/views/orders.js"></script>
+  <script src="js/views/products.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

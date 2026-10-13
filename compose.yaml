@@ -1,0 +1,86 @@
+name: hermes-prd-workbench
+services:
+  mysql:
+    build:
+      context: .
+      dockerfile: deploy/docker/mysql.Dockerfile
+    environment:
+      MYSQL_DATABASE: prd_workbench
+      MYSQL_USER: prd_workbench
+      MYSQL_PASSWORD_FILE: /run/secrets/PRD_DB_PASSWORD
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql-root-password
+    secrets:
+      - {source: db_password, target: PRD_DB_PASSWORD}
+      - {source: mysql_root_password, target: mysql-root-password}
+    volumes: [mysql_data:/var/lib/mysql]
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=$$(cat /run/secrets/PRD_DB_PASSWORD) mysql -h 127.0.0.1 -uprd_workbench -Dprd_workbench -Nse 'SELECT 1'"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  hermes:
+    build:
+      context: .
+      dockerfile: deploy/docker/hermes.Dockerfile
+    environment:
+      PRD_MODEL_PROVIDER: ${PRD_MODEL_PROVIDER:-custom:workbench}
+      PRD_MODEL_BASE_URL: ${PRD_MODEL_BASE_URL:?Set model base URL in .env}
+      PRD_MODEL_NAME: ${PRD_MODEL_NAME:?Set a tool-capable model name in .env}
+      PRD_CONTROL_PLANE_URL: http://backend:18100
+      NO_PROXY: localhost,127.0.0.1,::1,backend,mysql,hermes
+    secrets:
+      - {source: hermes_key, target: hermes-api-key}
+      - {source: plugin_key, target: plugin-key}
+      - {source: model_key, target: model-api-key}
+    volumes: [hermes_data:/data/hermes]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8643/health/detailed', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    security_opt: [no-new-privileges:true]
+  backend:
+    build:
+      context: .
+      dockerfile: deploy/docker/backend.Dockerfile
+    depends_on:
+      mysql: {condition: service_healthy}
+    environment:
+      PRD_SERVER_ADDRESS: 0.0.0.0
+      PRD_DB_URL: jdbc:mysql://mysql:3306/prd_workbench?useUnicode=true&characterEncoding=utf8&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true
+      PRD_DB_USERNAME: prd_workbench
+      PRD_UPLOAD_DIR: /data/uploads
+      PRD_HERMES_BASE_URL: http://hermes:8643
+      PRD_HERMES_API_KEY_FILE: /run/secrets/hermes-api-key
+      PRD_PLUGIN_KEY_FILE: /run/secrets/plugin-key
+      PRD_BOOTSTRAP_ADMIN_USERNAME: ${PRD_BOOTSTRAP_ADMIN_USERNAME:?Run setup first}
+      PRD_BOOTSTRAP_ADMIN_PASSWORD_FILE: /run/secrets/admin-password
+      PRD_TELEMETRY_ENABLED: ${PRD_TELEMETRY_ENABLED:-false}
+      PRD_TELEMETRY_RETENTION_DAYS: ${PRD_TELEMETRY_RETENTION_DAYS:-30}
+    secrets:
+      - {source: db_password, target: PRD_DB_PASSWORD}
+      - {source: hermes_key, target: hermes-api-key}
+      - {source: plugin_key, target: plugin-key}
+      - {source: admin_password, target: admin-password}
+    volumes: [uploads:/data/uploads]
+    security_opt: [no-new-privileges:true]
+  web:
+    build:
+      context: .
+      dockerfile: deploy/docker/web.Dockerfile
+      args:
+        VITE_TELEMETRY_ENABLED: ${PRD_TELEMETRY_ENABLED:-false}
+    depends_on: [backend]
+    ports: ["${PRD_WEB_BIND:-127.0.0.1}:${PRD_WEB_PORT:-8180}:8080"]
+    security_opt: [no-new-privileges:true]
+secrets:
+  db_password: {file: "${PRD_SECRETS_DIR:-./.runtime/secrets}/db-password", name: PRD_DB_PASSWORD}
+  mysql_root_password: {file: "${PRD_SECRETS_DIR:-./.runtime/secrets}/mysql-root-password"}
+  hermes_key: {file: "${PRD_SECRETS_DIR:-./.runtime/secrets}/hermes-api-key"}
+  plugin_key: {file: "${PRD_SECRETS_DIR:-./.runtime/secrets}/plugin-key"}
+  model_key: {file: "${PRD_SECRETS_DIR:-./.runtime/secrets}/model-api-key"}
+  admin_password: {file: "${PRD_SECRETS_DIR:-./.runtime/secrets}/admin-password"}
+volumes:
+  mysql_data:
+  uploads:
+  hermes_data:

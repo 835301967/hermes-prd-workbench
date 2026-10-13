@@ -1,0 +1,10 @@
+Hermes PRD Workbench
+Licensed under the Apache License, Version 2.0.
+
+This is an independent project and is not an official Nous Research product.
+Hermes Agent is separately licensed under MIT, copyright 2025 Nous Research.
+Hermes source is fetched at the commit recorded in config/versions.env; its LICENSE
+remains in the runtime image. No locally modified DPM integration is distributed.
+
+Other third-party dependencies retain their original licenses. See
+docs/maintainers/third-party.md and the release dependency inventory.

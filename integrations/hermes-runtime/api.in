@@ -1,0 +1,2 @@
+# API adapter only; no Telegram/Discord/Slack extras.
+aiohttp==3.14.5

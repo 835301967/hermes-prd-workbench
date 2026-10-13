@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hermes-prd-workbench:schema:review-report-spike.json",
+  "title": "Hermes PRD Review Result - Spike",
+  "type": "object",
+  "required": ["mode", "title", "summary", "blockingIssues"],
+  "properties": {
+    "mode": { "const": "REVIEW" },
+    "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "summary": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "blockingIssues": {
+      "type": "array",
+      "maxItems": 50,
+      "items": { "$ref": "#/$defs/item" }
+    },
+    "otherSuggestions": {
+      "type": "array",
+      "maxItems": 100,
+      "items": { "$ref": "#/$defs/item" },
+      "default": []
+    },
+    "readyItems": {
+      "type": "array",
+      "maxItems": 100,
+      "items": { "$ref": "#/$defs/item" },
+      "default": []
+    },
+    "references": {
+      "type": "array",
+      "maxItems": 200,
+      "items": { "$ref": "#/$defs/reference" },
+      "default": []
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "item": {
+      "type": "object",
+      "required": ["title"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "detail": { "type": "string", "maxLength": 4000 },
+        "impact": { "type": "string", "maxLength": 2000 },
+        "suggestion": { "type": "string", "maxLength": 4000 },
+        "referenceIds": {
+          "type": "array",
+          "items": { "type": "string", "maxLength": 100 },
+          "default": []
+        }
+      },
+      "additionalProperties": true
+    },
+    "reference": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 100 },
+        "sourceId": { "type": "string", "maxLength": 100 },
+        "sourceName": { "type": "string", "maxLength": 300 },
+        "quote": { "type": "string", "maxLength": 4000 },
+        "location": { "type": "string", "maxLength": 500 }
+      },
+      "additionalProperties": true
+    }
+  }
+}

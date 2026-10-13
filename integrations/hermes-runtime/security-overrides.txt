@@ -1,0 +1,7 @@
+# Explicit reviewed security overrides for the unchanged Hermes source.
+anyio==4.15.1
+PyJWT==2.15.1
+cryptography==50.0.2
+Pillow==12.3.0
+urllib3==2.8.0
+starlette==1.7.0

@@ -1,0 +1,39 @@
+name: prd-workbench
+version: 0.4.0
+description: "Minimal source reading and PRD result submission tools for the Hermes workbench."
+author: Hermes PRD Workbench contributors
+kind: standalone
+platforms:
+  - linux
+  - macos
+  - windows
+requires_env:
+  - name: PRD_CONTROL_PLANE_URL
+    description: "Internal URL of the PRD control plane."
+    secret: false
+  - name: PRD_PLUGIN_KEY
+    description: "Local Spike credential injected by the control plane."
+    secret: true
+provides_tools:
+  - list_sources
+  - read_source
+  - submit_result
+  - write_demo_file
+  - read_demo_file
+  - verify_demo
+  - write_poc_file
+  - read_poc_file
+  - list_poc_files
+  - verify_poc
+  - write_prd_file
+  - read_prd_file
+  - list_prd_files
+  - verify_prd
+  - write_test_case_file
+  - read_test_case_file
+  - list_test_case_files
+  - verify_test_case
+  - write_tech_spec_file
+  - read_tech_spec_file
+  - list_tech_spec_files
+  - verify_tech_spec
