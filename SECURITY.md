@@ -8,4 +8,4 @@ The initial supported line is 0.4.x after release. Self-host in a trusted enviro
 
 If a real secret is exposed, revoke/rotate it first and assess repository history, releases, images, CI output and external copies. Deleting the current file is insufficient. See [release gates](docs/maintainers/releasing.md).
 
-Maintainer: [835301967](https://github.com/835301967). If the private reporting feature is unavailable, contact [835301967@qq.com](mailto:835301967@qq.com) privately; do not post sensitive details publicly.
+Maintainer: [YuxForge](https://github.com/YuxForge). If the private reporting feature is unavailable, contact [835301967@qq.com](mailto:835301967@qq.com) privately; do not post sensitive details publicly.
