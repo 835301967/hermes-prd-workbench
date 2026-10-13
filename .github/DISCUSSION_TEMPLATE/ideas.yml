@@ -1,0 +1,24 @@
+title: "[Idea] "
+labels: ["ideas"]
+body:
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Workflow or problem
+      description: Describe the product or engineering workflow using synthetic examples.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed outcome
+      description: Explain what should become easier or clearer for users.
+    validations:
+      required: true
+  - type: checkboxes
+    id: hygiene
+    attributes:
+      label: Public information check
+      options:
+        - label: This post contains no credentials, customer documents, complete prompts, or private model responses.
+          required: true

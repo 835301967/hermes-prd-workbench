@@ -1,0 +1,31 @@
+name: Feature request
+description: Propose a focused improvement within the single-instance product boundary.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: Describe the user workflow and the obstacle. Use synthetic examples only.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: Explain the observable behavior that would solve the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: boundaries
+    attributes:
+      label: Constraints and alternatives
+      description: Note affected modes, exports, contracts, platforms, or security boundaries.
+  - type: checkboxes
+    id: hygiene
+    attributes:
+      label: Public information check
+      options:
+        - label: I have not included credentials, customer documents, complete prompts, or private model responses.
+          required: true

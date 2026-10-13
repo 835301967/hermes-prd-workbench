@@ -13,7 +13,7 @@
 
     <groupId>org.hermesprd</groupId>
     <artifactId>prd-control-plane</artifactId>
-    <version>0.4.0-beta.1</version>
+    <version>0.4.0-beta.2</version>
     <name>prd-control-plane</name>
     <description>Spike control plane for Hermes PRD review and generation</description>
 
@@ -75,6 +75,13 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <overwrite>true</overwrite>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>

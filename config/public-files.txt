@@ -1,7 +1,11 @@
 .dockerignore
 .editorconfig
 .env.example
+.github/DISCUSSION_TEMPLATE/ideas.yml
+.github/DISCUSSION_TEMPLATE/show-and-tell.yml
 .github/ISSUE_TEMPLATE/bug.yml
+.github/ISSUE_TEMPLATE/config.yml
+.github/ISSUE_TEMPLATE/feature.yml
 .github/pull_request_template.md
 .github/workflows/check.yml
 .gitignore
@@ -12,6 +16,7 @@ CONTRIBUTING.md
 LICENSE
 NOTICE
 README.md
+README.zh-CN.md
 SECURITY.md
 apps/backend/.mvn/wrapper/maven-wrapper.properties
 apps/backend/mvnw
@@ -228,6 +233,12 @@ deploy/nginx/default.conf
 docs/README.md
 docs/architecture/contracts.md
 docs/architecture/overview.md
+docs/assets/hermes-prd-workbench-demo.gif
+docs/assets/mobile-workbench.jpg
+docs/assets/poc-preview.jpg
+docs/assets/sandboxed-preview.jpg
+docs/assets/social-preview.jpg
+docs/assets/workbench-demo.jpg
 docs/deployment/self-hosting.md
 docs/development/getting-started.md
 docs/maintainers/change-report.md

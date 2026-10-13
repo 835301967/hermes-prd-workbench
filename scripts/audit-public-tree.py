@@ -6,9 +6,18 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 DIRECTORIES = ["apps/backend/src", "apps/web/src", "apps/web/public", "integrations", "contracts", "config", "deploy", "scripts", "tests", "docs", ".github"]
-FILES = ["README.md", "AGENTS.md", "LICENSE", "NOTICE", "CONTRIBUTING.md", "SECURITY.md", "CODE_OF_CONDUCT.md", "CHANGELOG.md", ".env.example", ".gitignore", ".dockerignore", ".editorconfig", "compose.yaml", "workbench", "apps/backend/pom.xml", "apps/backend/mvnw", "apps/backend/mvnw.cmd", "apps/backend/.mvn/wrapper/maven-wrapper.properties", "apps/web/package.json", "apps/web/pnpm-lock.yaml", "apps/web/index.html", "apps/web/tsconfig.json", "apps/web/vite.config.ts", "apps/web/pnpm-workspace.yaml", "config/public-files.txt"]
+FILES = ["README.md", "README.zh-CN.md", "AGENTS.md", "LICENSE", "NOTICE", "CONTRIBUTING.md", "SECURITY.md", "CODE_OF_CONDUCT.md", "CHANGELOG.md", ".env.example", ".gitignore", ".dockerignore", ".editorconfig", "compose.yaml", "workbench", "apps/backend/pom.xml", "apps/backend/mvnw", "apps/backend/mvnw.cmd", "apps/backend/.mvn/wrapper/maven-wrapper.properties", "apps/web/package.json", "apps/web/pnpm-lock.yaml", "apps/web/index.html", "apps/web/tsconfig.json", "apps/web/vite.config.ts", "apps/web/pnpm-workspace.yaml", "config/public-files.txt"]
 FORBIDDEN = re.compile("(?:" + "kuai" + "lu|快" + "鹭|192\\.168\\.102\\.|/Users/[A-Za-z0-9_.-]+/|/home/" + "deploy/|prd-" + "review|work" + "buddy-ai/memory)", re.I)
 CREDENTIAL = re.compile(r"(?:sk-[A-Za-z0-9_-]{24,}|gh[pousr]_[A-Za-z0-9]{30,}|AKIA[0-9A-Z]{16}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----)")
+PUBLIC_BINARY_ASSETS = {
+    "docs/assets/hermes-prd-workbench-demo.gif": b"GIF89a",
+    "docs/assets/mobile-workbench.jpg": b"\xff\xd8\xff",
+    "docs/assets/poc-preview.jpg": b"\xff\xd8\xff",
+    "docs/assets/sandboxed-preview.jpg": b"\xff\xd8\xff",
+    "docs/assets/social-preview.jpg": b"\xff\xd8\xff",
+    "docs/assets/workbench-demo.jpg": b"\xff\xd8\xff",
+}
+MAX_PUBLIC_BINARY_BYTES = 2 * 1024 * 1024
 
 
 EXCLUDED_PARTS = {"__pycache__", "node_modules", "target", ".venv", "dist", "coverage", ".runtime", "logs", "backups"}
@@ -65,19 +74,35 @@ def audit():
         print("FAIL " + str(ex))
         return False
     for path in paths:
-        try:
-            text = path.read_text(encoding="utf-8")
-        except UnicodeError:
-            failures.append((str(path.relative_to(ROOT)), "unreviewed binary"))
-            continue
+        relative = path.relative_to(ROOT).as_posix()
+        raw = path.read_bytes()
+        signature = PUBLIC_BINARY_ASSETS.get(relative)
+        if signature:
+            if not raw.startswith(signature):
+                failures.append((relative, "public image has an invalid signature"))
+                continue
+            if len(raw) > MAX_PUBLIC_BINARY_BYTES:
+                failures.append((relative, "public binary exceeds size limit"))
+                continue
+            if b"Exif\x00\x00" in raw:
+                failures.append((relative, "public image contains EXIF metadata"))
+                continue
+            text = raw.decode("latin-1")
+        else:
+            try:
+                text = raw.decode("utf-8")
+            except UnicodeError:
+                failures.append((relative, "unreviewed binary"))
+                continue
         if FORBIDDEN.search(text):
-            failures.append((str(path.relative_to(ROOT)), "private identity/topology marker"))
+            failures.append((relative, "private identity/topology marker"))
+            continue
         for line in text.splitlines():
             if CREDENTIAL.search(line):
                 # Exact synthetic adversarial literals in credential-validator tests are intentional.
                 if path.name in {"HtmlPayloadTest.java", "ResultValidatorTest.java", "demoPackage.test.ts"} and any(word in line.lower() for word in ["fake", "dummy", "test", "private key"]):
                     continue
-                failures.append((str(path.relative_to(ROOT)), "credential candidate; inspect privately"))
+                failures.append((relative, "credential candidate; inspect privately"))
                 break
     for path, reason in failures:
         print(f"FAIL {path}: {reason}")

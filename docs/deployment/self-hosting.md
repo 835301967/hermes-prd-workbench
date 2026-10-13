@@ -51,4 +51,4 @@ This first public preview uses a new migration checksum lineage. Internal pre-op
 
 ## Platform evidence
 
-Support is a test result, not a file claim. This preview declares macOS arm64 with Docker Desktop Linux containers only, after recording its final regression. Linux amd64 and Windows WSL2 are not yet verified or declared supported. Native development is a contributor workflow, not an additional supported deployment. Native Windows Hermes is not supported here. Nacos: 不适用：当前冻结基线不接入 Nacos.
+Support is a test result, not a file claim. This preview declares macOS arm64 and Windows 11 WSL2 with Docker Desktop Linux containers after their recorded acceptance. Linux amd64 is not yet verified or declared supported. Native development is a contributor workflow, not an additional supported deployment. Native Windows Hermes is not supported here. Nacos: 不适用：当前冻结基线不接入 Nacos.

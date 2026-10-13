@@ -1,0 +1,24 @@
+title: "[Show and tell] "
+labels: ["show-and-tell"]
+body:
+  - type: textarea
+    id: result
+    attributes:
+      label: What did you build?
+      description: Share a sanitized workflow, template, or generated result and the problem it solved.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment and release
+      description: Include the Workbench release, platform, Docker version, and model provider without secrets.
+    validations:
+      required: true
+  - type: checkboxes
+    id: hygiene
+    attributes:
+      label: Publication rights
+      options:
+        - label: I have the right to share these materials and have removed private or customer information.
+          required: true
