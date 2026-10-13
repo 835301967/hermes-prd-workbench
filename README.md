@@ -11,6 +11,8 @@
 需要 Docker Engine/Docker Desktop、Compose v2，以及 Python 3.10+ 用于启动脚本。Windows 请在 WSL2 的 Linux 文件系统中执行 setup 和所有命令，并启用 Docker Desktop 的 WSL2 集成；原生 Windows setup 不受支持。
 
 ```bash
+git clone https://github.com/835301967/hermes-prd-workbench.git
+cd hermes-prd-workbench
 ./workbench setup
 ./workbench start
 ./workbench doctor
@@ -19,8 +21,6 @@
 setup 会询问支持 Chat Completions 和工具调用的模型服务地址、模型名、模型 Key 和初始管理员密码。敏感输入不回显；配置放 `.env`，密钥放 `.runtime/secrets`，均不进入 Git。启动后访问 **http://127.0.0.1:8180**，使用显式设置的管理员账号登录；普通注册账号始终为 USER。
 
 首次构建需要下载固定版本的运行时和依赖。MySQL 8.4.11 从固定摘要的官方多架构镜像构建，仅移除未使用的管理工具并以数据库用户启动；平台实际验证状态见[调整报告](docs/maintainers/change-report.md)，不能将提供 Dockerfile 等同于所有平台已验证。
-
-
 
 停止：`./workbench stop`。此命令保留数据库、上传和 Hermes 卷。详见[部署与恢复](docs/deployment/self-hosting.md)。不需要 Nacos、Redis、MinIO 或消息队列。
 

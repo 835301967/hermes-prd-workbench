@@ -1,6 +1,6 @@
 # Release process
 
-The0.4.0-beta.1 tree is a preview prepared under the author’s explicit publication authorization. Final technical gates and concrete residual risk dispositions must still pass before making the new repository public. Maintainers release only after the implementation evidence and below gates pass. Current internal Git history must not be made public; populate the new repository from the audited snapshot.
+The 0.4.0-beta.1 tree is a preview under the author’s explicit publication authorization. The author confirmed browser acceptance and accepted the restricted-preview zlib/TLS residuals on 2026-10-13. Final artifact/CI verification and repository security settings are checked before publication. Maintainers release only after the implementation evidence and below gates pass. Current internal Git history must not be made public; populate the new repository from the audited snapshot.
 
 1. Confirm publication rights, Apache-2.0, upstream/third-party notices, dependency inventory/SBOM, model/asset source terms and neutral project name.
 2. Close P0/P1 and disposition P2; independent review verifies code, contracts, DDL, docs and tests. Freeze exact versions/commit and record unavoidable security decisions.
