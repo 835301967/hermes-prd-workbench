@@ -10,7 +10,8 @@ audit = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(audit)
 errors = []
 for path in audit.candidates():
-    if path.name == "LICENSE" or path.suffix == ".svg":
+    relative = path.relative_to(ROOT).as_posix()
+    if path.name == "LICENSE" or path.suffix == ".svg" or relative in audit.PUBLIC_BINARY_ASSETS:
         continue
     text = path.read_text()
     if not text.endswith("\n") or "\r" in text or any(line.rstrip() != line for line in text.splitlines()):

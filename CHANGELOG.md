@@ -2,9 +2,15 @@
 
 ## Unreleased
 
+## 0.4.0-beta.2 — preview
+
 - Use shared, trusted Mermaid root-level SVG-text configuration for PRD previews and Word export, preserving Chinese node labels through strict SVG sanitization; add real Mermaid flowchart/sequence regression coverage.
 
 - Preserve the browser Host port through the Compose Nginx proxy, fixing HTTP403 Invalid CORS request on same-origin login and writes through default/custom Web ports. Keep explicit cross-origin restrictions and add positive/negative transport regression coverage.
+
+- Record Windows 11 WSL2 browser and Word-export visual acceptance, add an English project home, synthetic-data product media, and public community entry points.
+
+- Make Maven copy packaged Skill resources even when reproducible source archives carry epoch timestamps; release checks now start from a clean backend target.
 
 ## 0.4.0-beta.1 — preview
 

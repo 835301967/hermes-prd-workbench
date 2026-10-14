@@ -2,7 +2,7 @@
 
 Reviewed 2026-10-13. Status: the author explicitly accepted both remaining risks on 2026-10-13 for the restricted preview, conditional on all other release gates passing.
 
-The first preview distributes audited source, checksums and dependency inventories, with fresh installation only and support limited to macOS arm64 + Docker Desktop Linux containers. Deploy only locally or on a trusted network; it is not a public SaaS release. No prebuilt images, JARs, model credentials or internal history are distributed.
+The current preview distributes audited source, checksums and dependency inventories, with fresh installation only and support limited to macOS arm64 and Windows 11 WSL2 with Docker Desktop Linux containers. Deploy only locally or on a trusted network; it is not a public SaaS release. No prebuilt images, JARs, model credentials or internal history are distributed.
 
 | Residual | Evidence and current exposure | Disposition |
 | --- | --- | --- |

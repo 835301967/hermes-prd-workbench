@@ -14,7 +14,7 @@ See [recorded upgrade decisions](security-release-decision.md) for exact depende
 
 ## Declared platform
 
-macOS arm64 with Docker Desktop Linux containers only. Linux amd64, Windows WSL2 and native deployments are not declared supported. Existing internal installations have no in-place migration guarantee.
+The current preview declares macOS arm64 and Windows 11 WSL2 with Docker Desktop Linux containers. Linux amd64 and native Windows deployments are not declared supported. Existing internal installations have no in-place migration guarantee.
 
 ## Evidence
 
@@ -44,4 +44,12 @@ The open-source SVG sanitizer correctly forbids foreignObject, but the preview/e
 
 Preview and Word export now use one trusted configuration factory with root-level htmlLabels=false, producing native SVG text while preserving strict security, size/edge bounds, rejected diagram directives and SVG sanitization. Flowchart node/edge text and sequence actors/messages/notes/alternatives/loops are covered using real Mermaid. The tests stub JSDOM geometry only and do not claim pixel-layout or PNG visual verification. A synthetic PRD fixture is provided for browser/export acceptance. Original generated Markdown and user drafts remain unmodified.
 
-After both fixes, the complete local suite passed234 backend,93 frontend,60 plugin and15 deployment/contract/inventory tests, plus the separate real Nginx transport test. The reviewed source manifest now includes313 files. Browser/WSL2 and Word/PNG visual confirmation remain pending; the passing SVG-label tests do not substitute for those checks.
+After both fixes, the complete local suite passed234 backend,93 frontend,60 plugin and15 deployment/contract/inventory tests, plus the separate real Nginx transport test. The reviewed source manifest included313 files at that correction point. The author subsequently completed the pending Windows 11 WSL2 browser and Word/PNG visual checks before authorizing beta.2.
+
+## 0.4.0-beta.2 release and community surface
+
+The author completed Windows 11 WSL2 browser acceptance and confirmed Mermaid flowchart/sequence labels plus Word-exported diagram images on 2026-10-13. The declared preview platforms are now macOS arm64 and Windows 11 WSL2 with Docker Desktop Linux containers; Linux amd64 and native Windows remain undeclared. The release is still limited to fresh installations, local or trusted networks, and trusted model endpoints. No database migration, prebuilt image, compiled binary or broader production claim is introduced.
+
+The public home now has an English README with a Chinese entry point, screenshots and an animated walkthrough made only from synthetic acceptance data. A generated brand illustration is used solely as the repository social card and is not presented as a product screenshot. Binary public media is restricted by exact path, file signature, size and metadata checks in the release audit. GitHub Discussions, roadmap issues, expanded topics and a latest-release homepage provide public support and contribution entry points.
+
+Testing the reproducible source snapshot exposed an epoch-timestamp interaction in Maven's incremental resource copy: Java compiled, but Markdown Skill resources could be omitted from a fresh target when their archived mtime was zero. The backend build now explicitly overwrites resources, and the standard check starts with a clean target. The extracted release archive is rebuilt and tested before publication.

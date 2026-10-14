@@ -52,6 +52,62 @@ class ReleaseBoundaryTests(unittest.TestCase):
             with patch.object(audit, 'ROOT', root):
                 self.assertEqual(['config/public-files.txt', 'docs/README.md'], [p.relative_to(root).as_posix() for p in audit.candidates()])
 
+    def test_exact_public_image_is_accepted_without_metadata(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.tree(root)
+            assets = root / 'docs/assets'
+            assets.mkdir()
+            image = assets / 'social-preview.jpg'
+            image.write_bytes(b'\xff\xd8\xff\xe0synthetic-image\xff\xd9')
+            (root / 'config/public-files.txt').write_text(
+                'config/public-files.txt\ndocs/README.md\ndocs/assets/social-preview.jpg\n'
+            )
+            with patch.object(audit, 'ROOT', root):
+                self.assertTrue(audit.audit())
+
+    def test_public_image_rejects_exif_metadata(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.tree(root)
+            assets = root / 'docs/assets'
+            assets.mkdir()
+            image = assets / 'social-preview.jpg'
+            image.write_bytes(b'\xff\xd8\xff\xe1Exif\x00\x00synthetic-metadata\xff\xd9')
+            (root / 'config/public-files.txt').write_text(
+                'config/public-files.txt\ndocs/README.md\ndocs/assets/social-preview.jpg\n'
+            )
+            with patch.object(audit, 'ROOT', root):
+                self.assertFalse(audit.audit())
+
+    def test_utf8_decodable_gif_still_requires_valid_signature(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.tree(root)
+            assets = root / 'docs/assets'
+            assets.mkdir()
+            image = assets / 'hermes-prd-workbench-demo.gif'
+            image.write_bytes(b'NOT-A-GIF')
+            (root / 'config/public-files.txt').write_text(
+                'config/public-files.txt\ndocs/README.md\ndocs/assets/hermes-prd-workbench-demo.gif\n'
+            )
+            with patch.object(audit, 'ROOT', root):
+                self.assertFalse(audit.audit())
+
+    def test_utf8_decodable_gif_still_enforces_size_limit(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.tree(root)
+            assets = root / 'docs/assets'
+            assets.mkdir()
+            image = assets / 'hermes-prd-workbench-demo.gif'
+            image.write_bytes(b'GIF89a' + b'A' * audit.MAX_PUBLIC_BINARY_BYTES)
+            (root / 'config/public-files.txt').write_text(
+                'config/public-files.txt\ndocs/README.md\ndocs/assets/hermes-prd-workbench-demo.gif\n'
+            )
+            with patch.object(audit, 'ROOT', root):
+                self.assertFalse(audit.audit())
+
 
 class ArchiveMetadataTests(unittest.TestCase):
     def test_archive_has_neutral_metadata_and_reproducible_bytes(self):

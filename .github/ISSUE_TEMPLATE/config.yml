@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and setup help
+    url: https://github.com/YuxForge/hermes-prd-workbench/discussions/categories/q-a
+    about: Ask usage and deployment questions without attaching private materials.
+  - name: Private security report
+    url: https://github.com/YuxForge/hermes-prd-workbench/security/advisories/new
+    about: Report vulnerabilities privately instead of opening a public issue.
